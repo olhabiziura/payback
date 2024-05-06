@@ -8,6 +8,7 @@ In today's interconnected world, managing shared expenses among friends, family,
 
 ## Usage
 bla bla bla add here later 
+
 Additional details can be found in the [Technical Report](/reports/???)
 
 ## Implementation 

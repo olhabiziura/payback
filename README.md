@@ -1,3 +1,5 @@
+![Project Header](/figures/label.PNG)
+
 # PayBack
 
 ## Abstract

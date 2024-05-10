@@ -59,7 +59,7 @@ paths:
           application/json:
             schema:
               description: |
-                User Login-Request, containing the user's username.
+                User Login-Request, containing the user's username and password.
                 The response will contain an appropriate user identifier.
               properties:
                 username: { $ref: "#/components/schemas/Username" }
@@ -99,7 +99,7 @@ paths:
           in: query
           description: Complete or partial username
           required: true
-          schema: { $ref: "#/components/schemas/UsernamePrompt" }
+          schema: { $ref: "#/components/schemas/Username" }
 
       responses:
         "200": { $ref: "#/components/responses/UserListResponse" }
@@ -131,7 +131,7 @@ paths:
           description: user was found and profile details returned.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/CompleteUser" }
+              schema: { $ref: "#/components/schemas/User" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
@@ -139,34 +139,7 @@ paths:
         "500": { $ref: "#/components/responses/ServerError" }
 
 
-  /users/{userID}/photos/:
-    description: endpoint disclosing actions on a user's photos collection.
-    parameters:
-      - $ref: "#/components/parameters/UserID"
-    get:
-      tags: ["files"]
-      summary: get a user's photos given the user Identifier
-      description: |
-        get a user's photos given their user identifier, using paginated
-        requests.
-
-        An authenticated session is requested to perform this action, 
-        due to privacy and ban-related reasons.
-
-      operationId: getUserPhotos
-      parameters:
-        - $ref: "#/components/parameters/PageNumberParameter"
-      responses:
-        "200":  { $ref: "#/components/responses/PostListResponse" }
-          # User was found and his/her photos returned
-
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-
+  
   /settings/username:
     description: endpoint disclosing actions on the authenticated user's resource.
     put:
@@ -200,358 +173,6 @@ paths:
         # No 404: user exists
         "500": { $ref: "#/components/responses/ServerError" }
   
-
-  /followed_users/{userID}:
-    description: endpoint disclosing actions on the authenticated user's followed users resources.
-    parameters:
-      - $ref: "#/components/parameters/UserID"
-    put:
-      tags: ["follow"]
-      summary: Follow a user
-      description: |
-        Add the user identified by "UserID" to your followed_Users collection.
-
-        An authenticated session is requested to perform this action, 
-        in order to select the correct resource and for
-        privacy-ban related operations.
-
-      operationId: followUser
-      responses:
-        "204":
-          description: |
-            the user was found, and you are now following this user.
-            If you were already following the user, this status will not be modified.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-    delete:
-      tags: ["follow"]
-      summary: Unfollow a user
-      description: |
-        Remove the user identified by "UserID" from your followed_Users collection.
-
-        An authenticated session is requested to perform this action, 
-        in order to select the correct resource.
-
-      operationId: unfollowUser
-      responses:
-        "204":
-          description: |
-            the user was found, and you aren't following this user anymore.
-            If you already weren't following the user, this status will not be modified.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-  /banned_users/{userID}:
-    description: endpoint disclosing actions on the authenticated user's banned users resources.
-    parameters:
-      - $ref: "#/components/parameters/UserID"
-    put:
-      tags: ["ban"]
-      summary: Ban a user
-      description: |
-        Add the user identified by "UserID" to your Banned_Users collection.
-
-        An authenticated session is requested to perform this action, 
-        in order to select the correct resource.
-
-      operationId: banUser
-      responses:
-        "204":
-          description: |
-            the user was found, and this user is now banned from accessing your content.
-            If the user was already banned, this status will not be modified.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        # No 403: can ban users that have banned you.
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-    delete:
-      tags: ["ban"]
-      summary: Pardon a user
-      description: |
-        Remove the user identified by "UserID" from your banned_Users collection.
-
-        An authenticated session is requested to perform this action, 
-        in order to select the correct resource.
-
-      operationId: unbanUser
-      responses:
-        "204":
-          description: |
-            the user was found, and this user is now pardoned and can access your content.
-            If the user wasn't banned, this status will not be modified.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        # No 403: can always pardon a user.
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-
-  /photos/:
-    description: endpoint disclosing actions on posting in a user's photos collection.
-    post:
-      tags: ["files"]
-      summary: post a photo
-      description: |
-        Post a new photo in your personal account.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource.
-      
-      operationId: uploadPhoto
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              description: Photo and caption to be uploaded.
-              type: object
-              properties:
-                photo: { $ref: "#/components/schemas/Photo" }
-                caption: { $ref: "#/components/schemas/Text" }
-      responses:
-        "201":
-          description: successful creation of the post, returns the photo resource.
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Post" }
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        # No 403: falls under AuthorizationError/Bad Request
-        # No 404: not searching for resource
-        "413":
-          description: Provided Content is too large.
-          content:
-            text/plain:
-              schema: { $ref: "#/components/schemas/Error" }
-        "415":
-          description: Provided Media type not supported.
-          content:
-            text/plain:
-              schema: { $ref: "#/components/schemas/Error" }
-        "500": { $ref: "#/components/responses/ServerError" }
-        
-        
-  /photos/{photoId}:
-    description: endpoint disclosing actions on a photo resource.
-    parameters:
-      - $ref: "#/components/parameters/photoId"
-    get:
-      tags: ["files"]
-      summary: Return the binary file composing the photo
-      description: |
-        Get the binary file of photo contents.
-
-        An authenticated session is requested to perform this action,
-        for privacy-ban related reasons.
-      
-      operationId: getPhoto
-      responses:
-        "200":
-          description: |
-            the post was found, and this response contains the photo.
-          content: 
-            image/png:
-              schema: { $ref: "#/components/schemas/Photo" }
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-    delete:
-      tags: ["files"]
-      summary: deletes a photo
-      description: |
-        Delete a photo from your personal account.
-
-        An authenticated session is requested to perform this action,
-        to authenticate the request.
-      
-      operationId: deletePhoto
-      responses:
-        "204":
-          description: |
-            Either the post was found, and it was successfully deleted,
-            or it didn't exist in the first place.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        # No 404: implemented by design in 204
-        "500": { $ref: "#/components/responses/ServerError" }
-
-
-  /photos/{photoId}/likes/self:
-    description: endpoint disclosing actions on the likes of a photo resource.
-    parameters:
-      - $ref: "#/components/parameters/photoId"
-    put:
-      tags: ['likes']
-      summary: like a photo
-      description: |
-        Like a photo from your personal account.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource.
-      
-      operationId: likePhoto
-      responses:
-        "204":
-          description: |
-            the photo was found, the sender had permission to put the like and
-            the like was saved. If the like was already present in the system, 
-            this status will not be modified (idempotent).
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-  
-    delete:
-      tags: ['likes']
-      summary: unlike a photo
-      description: |
-        unLike a photo from your personal account.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource.
-      
-      operationId: unlikePhoto
-      responses:
-        "204":
-          description: |
-            the photo was found, the sender had permission to delete the like and
-            the like was deleted. If the like wasn't present in the system, 
-            this status will not be modified (idempotent).
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-
-  /photos/{photoId}/comments/:
-    description: endpoint disclosing generic actions on the comments of a photo resource.
-    parameters:
-      - $ref: "#/components/parameters/photoId"
-    get:
-      tags: ['comments']
-      summary: get the comments of a photo
-      description: |
-        Receive the comments under a post, in reverse chronological order,
-        using pagination.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource and for privacy-ban related
-        reasons.
-      
-      operationId: getComment
-      parameters:
-        - $ref: "#/components/parameters/PageNumberParameter"
-      responses: 
-        "200": { $ref: "#/components/responses/CommentListResponse" }
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-    post:
-      tags: ['comments']
-      summary: comment on a photo
-      description: |
-        Comment on a photo from your personal account.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource.
-      
-      operationId: commentPhoto
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              description: Comment to add to the photo.
-              type: object
-              properties:
-                text: { $ref: "#/components/schemas/Text" }
-
-      responses:
-        "201":
-          description: |
-            the photo was found, the sender had permission to comment and
-            the comment was created.
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Comment" }
-          
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-  
-
-  /photos/{photoId}/comments/{commentID}:
-    description: endpoint disclosing deletion actions on the comments of a photo resource.
-    parameters:
-      - $ref: "#/components/parameters/photoId"
-      - $ref: "#/components/parameters/CommentID"
-    delete:
-      tags: ['comments']
-      summary: delete a comment of a photo
-      description: |
-        Delete a comment under a photo from your personal account.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource.
-      
-      operationId: uncommentPhoto
-      responses: 
-        "204": 
-          description: the comment was deleted.
-        "400": { $ref: "#/components/responses/BadRequestError" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        "403": { $ref: "#/components/responses/ForbiddenError" }
-        "404": { $ref: "#/components/responses/NotFoundError" }
-        "500": { $ref: "#/components/responses/ServerError" }
-
-
-  /stream:
-    description: endpoint allowing an authenticated user to fetch its photo stream.
-    get:
-      tags: ["stream"]
-      operationId: getMyStream
-      summary: Get the authenticated user post stream
-      description: |
-        Get the authenticated user post stream. It will contain the posts
-        of the profiles you are following, in reverse chronological order.
-
-        An authenticated session is requested to perform this action,
-        in order to select the correct resource and for privacy reasons.
-
-      parameters:
-        - $ref: "#/components/parameters/PageNumberParameter"
-      responses:
-        "200": { $ref: "#/components/responses/PostListResponse" }
-        "401": { $ref: "#/components/responses/AuthorizationError" }
-        # No 403
-        # No 404
-        "500": { $ref: "#/components/responses/ServerError" }
-  
-
-
-
-
-
-
 components:
   parameters:
     UserID:
@@ -565,43 +186,6 @@ components:
       required: true
       in: path
       schema: { $ref: "#/components/schemas/ResourceId" }
-
-
-    photoId:
-      description: |
-        Value representing the unique identifier of an photo.
-        The photoId is employed whenever information or actions on a generic
-        post is requested by the sender, for example listing the post details,
-        liking/commenting a post.
-
-      name: photoId
-      required: true
-      in: path
-      schema: { $ref: "#/components/schemas/ResourceId" }
-    
-    CommentID:
-      description: |
-        Value representing the unique identifier of a comment.
-        The CommentID is employed whenever information or actions on a generic
-        comment is requested by the sender, for example deletion of a comment.
-
-      name: commentID
-      required: true
-      in: path
-      schema: { $ref: "#/components/schemas/ResourceId" }
-    
-
-    PageNumberParameter:
-      name: page
-      description: |
-        reference to latest resource consumed by the client.
-        If the client hasn't previously received anything, the parameter may not be present.
-
-      required: false 
-      in: query
-      schema: { $ref: "#/components/schemas/PageNumber" }
-
-      
 
   responses:
     BadRequestError:
@@ -662,46 +246,8 @@ components:
             properties:
               users: { $ref: "#/components/schemas/UserList" }
     
-    PostListResponse:
-      description: |
-        response with an object containing 
-        - the page number
-        - the list of posts to be displayed at the client. 
-        The array may or may not contain elements.
-
-      content: 
-        application/json:
-          schema: 
-            description: |
-              an object containing 
-              - the page number
-              - the list of posts to be displayed at the client. 
-              The array may or may not contain elements.
-
-            type: object
-            properties:
-              page: { $ref: "#/components/schemas/PageNumber" }
-              posts: { $ref: "#/components/schemas/PostList" }
-
-    CommentListResponse:
-      description: |
-        response with an object containing 
-        - the page number
-        - the list of comments to be displayed at the client. 
-        The array may or may not contain elements
-
-      content: 
-        application/json:
-          schema: 
-            description: |
-              an object containing 
-              - the page number
-              - the list of posts to be displayed at the client. 
-              The array may or may not contain elements.
-            type: object
-            properties:
-              page: { $ref: "#/components/schemas/PageNumber" }
-              comments: { $ref: "#/components/schemas/CommentList" }
+  
+  
 
 
   schemas:
@@ -716,22 +262,6 @@ components:
       minLength: 0
       maxLength: 250
       readOnly: true
-
-    UsernamePrompt:
-      type: string
-      example: de.
-      pattern: "^[a-zA-Z][\\.]{0,1}(?:[\\w][\\.]{0,1})*$"
-      minLength: 3
-      maxLength: 25
-      description: |
-        A prompt to search in `/users/` endpoint used during login. It has the follwing properties:
-          - Matches . (`disco.dude` 200) but not .. (`disco..dude` 400)
-          - Beginning period not matched (`.discodude` 400)
-          - Ending period matched (`discodude.` 200)
-          - Match underscores (`_disco__dude_` 200)
-          - Min 3 characters 
-          - Max 25 characters 
-
     Username:
         type: string
         example: de.dead.b33f_03
@@ -758,14 +288,6 @@ components:
       maximum: 18446744073709551615 # 2^64-1 
       minimum: 0
 
-    PageNumber:
-      description: value used in pagination.
-      type: integer
-      example: 3
-      readOnly: true
-      maximum: 4294967295 # 2^32-1 
-      minimum: 0
-
     Text:
       description: Generic text. All user-inserted text-blocks will have this format.
       type: string
@@ -774,14 +296,6 @@ components:
       minLength: 0
       maxLength: 2000
 
-
-    TimeOfCreation:
-      description: Unix Time in MilliSecond
-      type: integer
-      minimum: 0
-      maximum: 9223372036854775807 # 2^63-1
-      example: 1707794428958
-      readOnly: true
 
     User:
       description: |
@@ -803,117 +317,7 @@ components:
       minItems: 0
       maxItems: 24
 
-    CompleteUser:
-      description: |
-        Resource representing a user. It contains all relevant information
-        about the user, including:
-        - the `userId`, enabling to perform actions on the user's resource.
-        - the `username`.
-        - Information about the user's profile: numberOfPosts, numeberOfFollowers, accountsFollowed
-        - Effective information for the user: isBanned, isFollowed.
-      
-      type: object
-      properties:
-        userId: { $ref: "#/components/schemas/ResourceId" }
-        username: { $ref: "#/components/schemas/Username" }
-        numberOfFollowers:
-          description: the number of users following the account.
-          type: integer
-          readOnly: true
-          minimum: 0
-          example: 200
-        accountsFollowed:
-          description: the number of users the account follows.
-          type: integer
-          readOnly: true
-          minimum: 0
-          example: 250
-        numberOfPosts:
-          description: the number of posts the account has made.
-          type: integer
-          readOnly: true
-          minimum: 0
-          example: 10
-        isBanned:
-          description: is the user banned by the account making the API call?
-          type: boolean
-          readOnly: true
-          example: false
-        isFollowed:
-          description: is the user being followed by the account making the API call?
-          type: boolean
-          readOnly: true
-          example: true
-
-    Photo:
-      description: Photo to upload/download, as binary file
-      type: string
-      format: binary
-      pattern: "^[01]+$"
-      minLength: 4096     # 4kB
-      maxLength: 15728640 # 15MB
-
-    Post:
-      description: |
-        Resource representing a post. It contains all relevant information
-        about the post, including:
-        - the `photoId`, enabling to perform actions on the photo's resource.
-        - the `author` as `User` resource.
-        - the `caption`, `numberOfLikes`, `numberOfComments`, `isLiked`.
-        - the unix creation Time of the resource `creation`.
-        
-      type: object
-      properties:
-        photoId: { $ref: "#/components/schemas/ResourceId" }
-        author: { $ref: "#/components/schemas/User" }
-        caption: { $ref: "#/components/schemas/Text"}
-          
-        numberOfLikes:
-          description: likes this post received
-          type: integer
-          minimum: 0
-          example: 3000
-          readOnly: true
-        numberOfComments:
-          description: comments this post received
-          type: integer
-          minimum: 0
-          example: 3000
-          readOnly: true
-        creation: { $ref: "#/components/schemas/TimeOfCreation"}
-        isLiked:
-          description: has the post been liked by the account making the API call?
-          type: boolean
-          readOnly: true
-
-
-    PostList:
-      description: |
-        an array of Posts, to be displayed at the client.
-      type: array
-      items: { $ref: "#/components/schemas/Post" }
-      minItems: 0
-      maxItems: 24
-
-
-    Comment:
-      description: a comment under a post
-      type: object
-      properties:
-        commentId: { $ref: "#/components/schemas/ResourceId" }
-        author: { $ref: "#/components/schemas/User" }
-        photoId: { $ref: "#/components/schemas/ResourceId" }
-        text: { $ref: "#/components/schemas/Text"}
-        creation: { $ref: "#/components/schemas/TimeOfCreation"}
-
-
-    CommentList:
-      description: |
-        an array of Comments, to be displayed at the client.
-      type: array
-      items: { $ref: "#/components/schemas/Comment" }
-      minItems: 0
-      maxItems: 24
+  
 
   securitySchemes:
     bearerAuthentication:

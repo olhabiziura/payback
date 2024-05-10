@@ -34,6 +34,8 @@ Additional details can be found in the [Technical Report](/reports/???)
 
 ## Implementation 
 
+### API 
+In the /doc folder you can find api.yaml file that describes API endpoints
 bla bla bla add here later 
 
 ## Authors

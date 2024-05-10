@@ -34,6 +34,9 @@ Additional details can be found in the [Technical Report](/reports/???)
 
 ## Implementation 
 
+### API 
+In the [/doc](/doc/) folder you can find [api.yaml](/doc/api.yaml) file that describes API endpoints
+( for now its just copy of wasa api heheh)
 bla bla bla add here later 
 
 ## Authors

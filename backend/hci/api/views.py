@@ -57,3 +57,4 @@ def main_page(request):
         # many = True is when you need to serialize queu or set
         serializer = GroupSerializer(groups, many=True)
         return JsonResponse(serializer.data, safe=False)
+        

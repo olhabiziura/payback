@@ -20,3 +20,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
         fields = ['id', 'username', 'debt', 'groups', 'profilePicture', 'date_joined']
+
+
+class LoginRequestSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = User
+        fields = ['username', 'password']

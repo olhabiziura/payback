@@ -1,5 +1,9 @@
 from django.db import models
-
+from django.utils import timezone
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from .managers import CustomUserManager
 # Create your models here.
 
 
@@ -8,22 +12,53 @@ class Group(models.Model):
     # name of the group 
     name = models.CharField(max_length=100) 
     # collection of users in the group (for now its in text field, later maybe change to more apropriate field type)
-    users = models.TextField()
-    
+    users = models.TextField()  
+    # the amount of money that users needed to share 
+    amount = models.PositiveIntegerField(blank=True, null=True)
+    # date and time when the group was created 
+    created = models.DateField(timezone.now(), default='1111-11-11')
+    # debts of each user 
+    debts = models.TextField(default=0)
     def __str__(self):
         return self.name
 
-# model of User - a way User will be represented in DB, has username, ... , django creates autoincremented id automatically, 
-class User(models.Model):
+# # model of User - a way User will be represented in DB, has username, ... , django creates autoincremented id automatically, 
+# class User(models.Model):
+#     # a unique username 
+#     username = models.CharField(max_length=20)
+#     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
+#     debt = models.BooleanField()
+#     # groups that user is in. on_delete param maybe should be diff idk for now
+#     groups = models.ForeignKey(Group, null=True, blank=True , on_delete=models.RESTRICT)
+#     # user profile photo 
+#     profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True)
+#     def __str__(self):
+#         return self.username
+    
+
+
+
+class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 
-    username = models.CharField(max_length=20)
+    username = models.CharField(max_length=20, unique=True)
     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
-    debt = models.BooleanField()
+    debt = models.BooleanField(default=False)
     # groups that user is in. on_delete param maybe should be diff idk for now
     groups = models.ForeignKey(Group, null=True, blank=True , on_delete=models.RESTRICT)
+    # user profile photo 
+    profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.username
+
 # to migrate:
     # 1. add app to settings settings.py
     # 2. use python manage.py makemigrations   

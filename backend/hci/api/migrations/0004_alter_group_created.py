@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0002_alter_group_created'),
+        ('api', '0003_alter_group_created'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='group',
             name='created',
-            field=models.DateField(default='1111-11-11', verbose_name=datetime.datetime(2024, 5, 11, 16, 33, 3, 983355, tzinfo=datetime.timezone.utc)),
+            field=models.DateField(default='1111-11-11', verbose_name=datetime.datetime(2024, 5, 11, 16, 33, 18, 284331, tzinfo=datetime.timezone.utc)),
         ),
     ]

@@ -25,4 +25,4 @@ class LoginRequestSerializer(serializers.ModelSerializer):
 class DebtSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Debt
-        fields = ['debts']
+        fields = ['id','debts']

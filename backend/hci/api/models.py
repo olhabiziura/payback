@@ -31,7 +31,7 @@ class Debt(models.Model):
     debts = models.TextField(default={'user': 0})
 
     def __str__(self): 
-        return self.debts
+        return self.id
 
 class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 

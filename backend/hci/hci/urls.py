@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
-from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login
+from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login, Debt
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,6 @@ urlpatterns = [
     path('groups/<int:id>', GroupDetail.as_view()),
     path('users/<int:id>', UserDetail.as_view()),
     path('login', Login.as_view()),
-    
+    path('groups/<int:id>/debt', Debt.as_view())
     
 ]

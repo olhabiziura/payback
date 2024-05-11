@@ -1,6 +1,6 @@
 import json
 from django.shortcuts import render, HttpResponse
-from .models import Group, User
+from api.models import Group, User, Debt
 from .serializers import GroupSerializer, UserSerializer, LoginRequestSerializer, DebtSerializer
 from django.http import  JsonResponse
 from rest_framework.parsers import  JSONParser
@@ -150,6 +150,24 @@ class Debt(APIView):
         except User.DoesNotExist:
              return HttpResponse(status=404)
     
+    def get_debt(self, debt_id): 
+        try: 
+             return Debt.objects.get(username = username)
+        except Debt.DoesNotExist: 
+             return HttpResponse(status=404)
+        
+    def post(self,request, id): 
+        group = self.get_group(id)
+        serializer = DebtSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            print(serializer.data['id'])
+            debt = self.get_debt(serializer.data['id'])
+            group.debt = debt
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+    
+
+
     def put(self, request, id): 
         group = self.get_group(id)
         request_username = request.data["username"]

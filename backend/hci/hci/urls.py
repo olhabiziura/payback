@@ -17,14 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
-from api.views import  group_list, user_list, user_details, main_page, login
+from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('groups', group_list ),
-    path('users/', user_list),
-    path('users/<int:pk>', user_details),
-    path('', main_page),
-    path('login', login)
+    path('groups/', GroupList.as_view() ),
+    path('users/', UserList.as_view()),
+    path('groups/<int:id>', GroupDetail.as_view()),
+    path('users/<int:id>', UserDetail.as_view()),
+    path('login', Login.as_view()),
+    
     
 ]

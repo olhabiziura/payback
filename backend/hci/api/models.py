@@ -11,32 +11,27 @@ from .managers import CustomUserManager
 class Group(models.Model): 
     # name of the group 
     name = models.CharField(max_length=100) 
-    # collection of users in the group (for now its in text field, later maybe change to more apropriate field type)
-    users = models.TextField()  
+    # collection of users in the group (for now its in text field, later maybe change to more apropriate field type). I use User in '' 
+    # since python doesnt have forward declaration and  i cant point to User class declared below lol 
+    users = models.ManyToManyField('User')  
     # the amount of money that users needed to share 
     amount = models.PositiveIntegerField(blank=True, null=True)
     # date and time when the group was created 
     created = models.DateField(timezone.now(), default='1111-11-11')
     # debts of each user 
-    debts = models.TextField(default=0)
+    debts = models.ForeignKey('Debt', default=None, null = True, blank = True, on_delete=models.CASCADE)
+
     def __str__(self):
         return self.name
 
-# # model of User - a way User will be represented in DB, has username, ... , django creates autoincremented id automatically, 
-# class User(models.Model):
-#     # a unique username 
-#     username = models.CharField(max_length=20)
-#     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
-#     debt = models.BooleanField()
-#     # groups that user is in. on_delete param maybe should be diff idk for now
-#     groups = models.ForeignKey(Group, null=True, blank=True , on_delete=models.RESTRICT)
-#     # user profile photo 
-#     profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True)
-#     def __str__(self):
-#         return self.username
+
+class Debt(models.Model): 
     
+    # amounts of the debt 
+    debts = models.TextField(default={'user': 0})
 
-
+    def __str__(self): 
+        return self.debts
 
 class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 
@@ -44,7 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
     debt = models.BooleanField(default=False)
     # groups that user is in. on_delete param maybe should be diff idk for now
-    groups = models.ForeignKey(Group, null=True, blank=True , on_delete=models.RESTRICT)
+    groups = models.TextField(null=True, blank=True , default=None, )
     # user profile photo 
     profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True)
     is_staff = models.BooleanField(default=False)

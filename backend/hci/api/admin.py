@@ -10,7 +10,7 @@ class GroupModel(admin.ModelAdmin):
     # ways of filtering 
     list_filter = ('name', 'users')
     # what displays on admin panel
-    list_display = ('name', 'users')
+    list_display = ('id', 'name')
 
 @admin.register(User)
 class UserModel(admin.ModelAdmin):

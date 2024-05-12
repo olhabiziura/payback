@@ -17,15 +17,22 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.urls import include, path
-from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login, Debt
+from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login, DebtDetail, UserDetailViewSet
+from  rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('users', UserDetailViewSet, basename='users')
+
+
 
 urlpatterns = [
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
     path('groups/', GroupList.as_view() ),
     path('users/', UserList.as_view()),
     path('groups/<int:id>', GroupDetail.as_view()),
-    path('users/<int:id>', UserDetail.as_view()),
+  #  path('users/<int:id>', UserDetail.as_view()),
     path('login', Login.as_view()),
-    path('groups/<int:id>/debt', Debt.as_view())
+    path('groups/<int:id>/debt', DebtDetail.as_view())
     
 ]

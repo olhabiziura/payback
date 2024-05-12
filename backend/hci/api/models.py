@@ -25,14 +25,6 @@ class Group(models.Model):
         return self.name
 
 
-class Debt(models.Model): 
-    
-    # amounts of the debt 
-    debts = models.TextField(default={'user': 0})
-
-    def __str__(self): 
-        return self.id
-
 class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 
     username = models.CharField(max_length=20, unique=True)
@@ -54,6 +46,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
+
+# model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
+class Debt(models.Model): 
+    # debts of each user 
+    debts = models.TextField()
+    def __str__(self):
+        return self.debts
 # to migrate:
     # 1. add app to settings settings.py
     # 2. use python manage.py makemigrations   

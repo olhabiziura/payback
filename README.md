@@ -24,10 +24,19 @@ After that you need to install Django and Django REST framework with the followi
 
  pip isntall djangorestframework
 ```
-Then go to the folder with manage.py by typing "cd api" in command line and start server by typing 
+Then go to the folder with manage.py by typing "cd backend" to get into **backend** directory and then type "cd hci" to get into **hci** and then in command line and start server by typing 
 ```
 python3 manage.py runserver
 ```
+
+---
+### Creating a new super user (admin)
+
+To create a new superuser use 
+```
+python3 manage.py createsuperuser
+```
+
 bla bla bla add here later 
 
 Additional details can be found in the [Technical Report](/reports/???)

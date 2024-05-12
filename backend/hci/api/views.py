@@ -134,10 +134,7 @@ class UserList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
 
      def get(self, request): 
           return self.list(request)
-     
-     def post(self, request): 
-         return self.create(request)
-     
+
 
 
 class UserDetailViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin ,  mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin):
@@ -159,6 +156,7 @@ class UserDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Upda
           return self.retrieve(request, id = id)
      
      def put(self, request, id): 
+ 
          return self.update(request, id = id)
      
      def delete(self, request, id):

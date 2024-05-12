@@ -95,36 +95,38 @@ paths:
         # No 403
         # No 404
         "500": { $ref: "#/components/responses/ServerError" }
-
-
+  
+  /test_token: 
+    description: enpoint to test the authentity of token 
+    get:  
+      tags: ["token"]
+      summary: checks authentity of token 
+      description: |
+        checks authentity of a token that is sent in http Authorization header. If token is valid server sends back a 200 status response
+      operationId: checkToken
+      responses: 
+        "200": { $ref: "#/components/responses/userListResponse" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+  
   /users/:
-    description: endpoint disclosing the users' collection.
+    description: endpoint to get a list of users
     get:
       tags: ["user"]
       summary: Search users' collection
       description: |
-        Search users through a complete or partial match of their usernames.
-
-        Not required by project specifications.
-        An authenticated session is requested to perform this action, 
-        due to privacy and ban-related reasons.
+        for now it just return all users, later will be added fucntionality to search users based on matching whole username or part of username
       operationId: searchUser
-      parameters:
-        - name: username
-          in: query
-          description: Complete or partial username
-          required: true
-          schema: { $ref: "#/components/schemas/username" }
       responses:
-        "200": { $ref: "#/components/responses/UserListResponse" }
+        "200": { $ref: "#/components/responses/userListResponse" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         # No 403: User will not see banned users
-        # No 404: 404 would be 200 empty-UserListResponse
+        # No 404: 404 would be 200 empty-userListResponse
         "500": { $ref: "#/components/responses/ServerError" }
-
+  
   /users/{userID}:
-    description: endpoint disclosing actions on a user-profile resource, identified by their UserID.
+    description: endpoint for retrieving a user with specific id
     parameters:
       - $ref: "#/components/parameters/UserID"
     get:
@@ -151,41 +153,35 @@ paths:
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
 
-
-  
-  /settings/username:
-    description: endpoint disclosing actions on the authenticated user's resource.
-    put:
-      tags: ["settings"]
-      summary: Update current username
+    put: 
+      tags: ["user"]
+      summary: update a user's profile with new data 
       description: |
-        Update the username.
-
-        An authenticated session is requested to perform this action, 
-        in order to select the correct resource.
-      
-      operationId: setMyUserName
+        changes user's details with a new given one. For now you can change only username, email and profile picture
+      operationId: updateUser
       requestBody:
-        description: Fields to update in the current user's resource
         required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/username" }
-
+        content: 
+          application/json: 
+            schema: 
+             description: fields to update 
+             properties: 
+                username:  { $ref: "#/components/schemas/username" }
+                email:  { $ref: "#/components/schemas/email" }
+                groups: { $ref: "#/components/schemas/groups" }
+                profilePicture: { $ref: "#/components/schemas/profilePicture" }
       responses:
-        "200": 
-          description: user details successfully modified.
+        "200":
+          description: user was found and profile details returned.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/user" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
-          # User requested a username that was already taken
-
-        # No 404: user exists
+        "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
-  
+
 components:
   parameters:
     UserID:
@@ -244,7 +240,7 @@ components:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
 
-    UserListResponse:
+    userListResponse:
       description: |
         returns a list of users to be displayed at the client.
         The array may or may not contain elements.
@@ -257,9 +253,54 @@ components:
               The array may or may not contain elements
             type: object
             properties:
-              users: { $ref: "#/components/schemas/UserList" }
+              users: { $ref: "#/components/schemas/userList" }
     
   schemas:
+    groups: 
+      description: | 
+         a collection of groups 
+      type: object
+      properties: 
+        id: 
+          description: unique id of a group
+          type: integer
+          example: 1
+        name: 
+          description: unique name of a group
+          type: string
+          example: hci
+          minLength: 3
+        users: 
+          { $ref: "#/components/schemas/userList" }
+        amount: 
+          description: the amount of debt of all users 
+          type: integer
+          example: 300
+        created: 
+          description: date when the group was created
+          type: string
+          format: date
+          example: 2011-11-11
+        debts: 
+          description: the collection of debts
+          type: array
+          items: 
+            {$ref: "#/components/schemas/debt"}
+        
+    debt: 
+      description: a debt 
+      type: object
+      properties: 
+        id: 
+          description: unique id of a group
+          type: integer
+          example: 1
+        owner: 
+           {$ref: "#/components/schemas/user"}
+        debts: 
+          description: how much other users own to owner 
+          type: string 
+          example: "[1,2,3]"
     profilePicture: 
       description: profile picture(idk later will add)
     email: 
@@ -324,10 +365,10 @@ components:
         token: { $ref: "#/components/schemas/token" }
         username: { $ref: "#/components/schemas/username" }
         
-    UserList:
+    userList:
       description: |
         an array of `User`, to be displayed in search queries.
-        it should be included in an object and be named `users`, as in UserListResponse. 
+        it should be included in an object and be named `users`, as in userListResponse. 
       type: array
       items: { $ref: "#/components/schemas/user" }
       minItems: 0

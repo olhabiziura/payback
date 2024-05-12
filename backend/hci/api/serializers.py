@@ -13,9 +13,10 @@ class GroupSerializer(serializers.ModelSerializer):
 # serializer for Custom User model
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
-        model = User
-        fields = ['id', 'username', 'email',  'profilePicture']
 
+        model = User
+        fields = ['id', 'username','groups','email', 'owns','profilePicture']
+        read_only_fields = ['owns']
 
 
 class SignupRequestSerializer(serializers.ModelSerializer):

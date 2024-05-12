@@ -19,7 +19,7 @@ class Group(models.Model):
     # date and time when the group was created 
     created = models.DateField(timezone.now(), default='1111-11-11')
     # debts of each user 
-    debts = models.ForeignKey('Debt', default=None, null = True, blank = True, on_delete=models.CASCADE)
+    debts = models.ManyToManyField('Debt')
 
     def __str__(self):
         return self.name
@@ -31,9 +31,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # email 
     email = models.EmailField()
     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
-    debt = models.BooleanField(default=False)
+    owns = models.BooleanField(default=False)
     # groups that user is in. on_delete param maybe should be diff idk for now
-    groups = models.TextField(null=True, blank=True , default=None, )
+    groups = models.ManyToManyField(Group)
     # user profile photo 
     profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True, blank=True)
     is_staff = models.BooleanField(default=False)
@@ -51,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
+    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL)
     # debts of each user 
     debts = models.TextField()
     def __str__(self):

@@ -13,13 +13,20 @@ class GroupSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
-        fields = ['id', 'username', 'debt', 'groups', 'profilePicture', 'date_joined']
+        fields = ['id', 'username', 'email', 'debt', 'groups', 'profilePicture', 'date_joined']
+
+
+
+class SignupRequestSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = User
+        fields = ['username', 'password', 'email']
 
 
 class LoginRequestSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
-        fields = ['username']
+        fields = ['username', 'password']
 
 
 class DebtSerializer(serializers.ModelSerializer):

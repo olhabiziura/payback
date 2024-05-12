@@ -1,35 +1,56 @@
 import json
 from django.shortcuts import render, HttpResponse
 from api.models import Group, User, Debt
-from .serializers import GroupSerializer, UserSerializer, LoginRequestSerializer, DebtSerializer
+from .serializers import GroupSerializer, UserSerializer, LoginRequestSerializer, DebtSerializer, SignupRequestSerializer
 from django.core.serializers import serialize, deserialize
 from django.http import  JsonResponse
 from rest_framework.parsers import  JSONParser
-from rest_framework.decorators import api_view, APIView
+from rest_framework.decorators import api_view, APIView, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics, mixins
 from rest_framework import viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import SessionAuthentication,TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+
 
 # Create your views here.
 
+# API endpoint doe login
+@api_view(['POST'])
+def login(request):
+        user = get_object_or_404(User, username = request.data['username'])
+        if not user.check_password(request.data['password']):
+             return Response({"detail":"Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        token, created = Token.objects.get_or_create(user=user)
+        serializer = UserSerializer(instance=user)
+        return Response({"token":token.key, "user":serializer.data})
 
-# API endpoint for login 
-class Login(APIView):
 
-    # func for login. for now it uses only username since password is stored in db as hashed value and idk how to hash for now
-    # later will be added that fucntionaloty 
-    def post(self, request): 
-       
-        request_username = request.data["username"]
-        try: 
-             user = User.objects.get(username = request_username)
-        except User.DoesNotExist:
-             return HttpResponse(status=404)
-        serializer = LoginRequestSerializer(user, data = request.data)
-        if serializer.is_valid():
-             return JsonResponse(serializer.data['username'], status=200, safe=False)
-        return JsonResponse(serializer.errors, status=400)
+# API endpoint for signup
+@api_view(['POST'])
+def signup(request):
+        serializer = SignupRequestSerializer(data = request.data)
+        if serializer.is_valid(): 
+             serializer.save()
+             user = User.objects.get(username=request.data['username'])
+             user.set_password(request.data['password'])
+             user.save()
+             token = Token.objects.create(user=user)
+             return Response({"token":token.key, "user":serializer.data})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def test_token(request):
+        
+        return Response("passed for {}".format(request.user.email))
+
 
 
 
@@ -114,6 +135,9 @@ class UserList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
 class UserDetailViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin ,  mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, mixins.CreateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+
 
 # API endpoint for getting details about the user with given id. 
 class UserDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):

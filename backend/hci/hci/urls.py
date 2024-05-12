@@ -16,8 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from django.urls import include, path
-from api.views import  GroupList, UserList, GroupDetail, UserDetail, Login, DebtDetail, UserDetailViewSet
+from django.urls import include, path, re_path
+from api.views import  GroupList, UserList, GroupDetail, DebtDetail, UserDetailViewSet, login, signup, test_token
 from  rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
@@ -32,7 +32,9 @@ urlpatterns = [
     path('users/', UserList.as_view()),
     path('groups/<int:id>', GroupDetail.as_view()),
   #  path('users/<int:id>', UserDetail.as_view()),
-    path('login', Login.as_view()),
-    path('groups/<int:id>/debt', DebtDetail.as_view())
-    
+  #  path('login', Login.as_view()),
+    path('groups/<int:id>/debt', DebtDetail.as_view()),
+    re_path('login', login) ,
+    re_path('signup',signup),
+    re_path('test_token',test_token)
 ]

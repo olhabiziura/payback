@@ -28,6 +28,8 @@ class Group(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 
     username = models.CharField(max_length=20, unique=True)
+    # email 
+    email = models.EmailField()
     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
     debt = models.BooleanField(default=False)
     # groups that user is in. on_delete param maybe should be diff idk for now

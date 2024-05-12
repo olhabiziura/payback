@@ -28,6 +28,14 @@ Then go to the folder with manage.py by typing "cd backend" to get into **backen
 ```
 python3 manage.py runserver
 ```
+
+### Creating a new super user (admin)
+
+To create a new superuser use 
+```
+python3 manage.py createsuperuser
+```
+
 bla bla bla add here later 
 
 Additional details can be found in the [Technical Report](/reports/???)

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Group, User, Debt
 
+
 # serializer for Group model
 class GroupSerializer(serializers.ModelSerializer):
     # this is modelSerializer, instead of defining fields, we just use them from models.py  
@@ -27,6 +28,7 @@ class LoginRequestSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
         fields = ['username', 'password']
+
 
 
 class DebtSerializer(serializers.ModelSerializer):

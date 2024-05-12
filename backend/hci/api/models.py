@@ -35,7 +35,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # groups that user is in. on_delete param maybe should be diff idk for now
     groups = models.TextField(null=True, blank=True , default=None, )
     # user profile photo 
-    profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True)
+    profilePicture = models.ImageField(upload_to ='uploads/', default=None, null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)

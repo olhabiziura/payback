@@ -1,7 +1,7 @@
 import json
 from django.shortcuts import render, HttpResponse
 from api.models import Group, User, Debt
-from .serializers import GroupSerializer, UserSerializer, LoginRequestSerializer, DebtSerializer, SignupRequestSerializer, TokenTestSerializer
+from .serializers import GroupSerializer, UserSerializer, LoginRequestSerializer, DebtSerializer, SignupRequestSerializer
 from django.core.serializers import serialize, deserialize
 from django.http import  JsonResponse
 from rest_framework.parsers import  JSONParser

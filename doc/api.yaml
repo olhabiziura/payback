@@ -16,37 +16,53 @@ tags:
   - name: user
     description: Operations related to profile management and users' search.  
 
-  - name: ban
-    description: Operations related to bans/pardons.
-
-  - name: follow
-    description: Operations related to follow status management.
-
-  - name: files
-    description: Operations related to files and photos upload and management.
-
-  - name: likes
-    description: Operations related to management of likes.
-
-  - name: comments
-    description: Operations related to management of comments.
-  
-  - name: settings
-    description: Operations related to modifications of the user's profile.
-  
-  - name: stream
-    description: Operations related to accessing the user's stream.
-
 
 security:
   - bearerAuthentication: []
 
 
 paths:
+
+  /signup: 
+    description: |
+     endpoint for creating a new acc, this endpoint will create only
+     regular users (not admins)
+    post: 
+      tags: ["signup"]
+      summary: Creates a new user with given credentails
+      description: |
+        creates a new user based on given username that should be unique, password, email and optional profile picture
+      security: []
+      operationId: doSignup
+      requestBody: 
+        description: user signup details
+        required: true
+        content: 
+          application/json: 
+            schema: 
+              description: |  
+                  creating new user requires username, password, email and optionally prof pic
+              properties: 
+                username: { $ref: "#/components/schemas/username"}
+                password: { 
+                  $ref: "#/components/schemas/password"}
+                email: { $ref: "#/components/schemas/email"}
+                profilePicture: { $ref: "#/components/schemas/profilePicture" } 
+      responses: 
+        "201":
+          description: sing up succ, returns user identifier.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user" }
+        # No 401
+        # No 403
+        # No 404
+        "500": { $ref: "#/components/responses/ServerError" }
+  
   /login:
     description: endpoint enabling login.
     post:
-      tags: ["session"]
+      tags: ["login"]
       summary: Logs in the user
       description: |
         I know ppl want to use Google Auth but idk how to implement it, and think its implementation is on Front-End so i just leave it like this
@@ -59,22 +75,22 @@ paths:
           application/json:
             schema:
               description: |
-                User Login-Request, containing the user's username and password.
-                The response will contain an appropriate user identifier.
+                  login is based on username and password that 
+                  user should provide. In response server sends back 
+                  user details and auth token that will be used later 
+                  for other operations 
               properties:
-                username: { $ref: "#/components/schemas/Username" }
+                username: { $ref: "#/components/schemas/username" }
                 password: { 
                   $ref: "#/components/schemas/password"
                 }
-              
-    
       responses:
         "200":
           description: login succ, returns user identifier.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/ResourceId" }
-        "400": { $ref: "#/components/responses/BadRequestError" }
+              schema: { $ref: "#/components/schemas/user" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
         # No 401
         # No 403
         # No 404
@@ -92,15 +108,13 @@ paths:
         Not required by project specifications.
         An authenticated session is requested to perform this action, 
         due to privacy and ban-related reasons.
-
-      operationId: SearchUsers
+      operationId: searchUser
       parameters:
         - name: username
           in: query
           description: Complete or partial username
           required: true
-          schema: { $ref: "#/components/schemas/Username" }
-
+          schema: { $ref: "#/components/schemas/username" }
       responses:
         "200": { $ref: "#/components/responses/UserListResponse" }
         "400": { $ref: "#/components/responses/BadRequestError" }
@@ -108,7 +122,6 @@ paths:
         # No 403: User will not see banned users
         # No 404: 404 would be 200 empty-UserListResponse
         "500": { $ref: "#/components/responses/ServerError" }
-      
 
   /users/{userID}:
     description: endpoint disclosing actions on a user-profile resource, identified by their UserID.
@@ -131,7 +144,7 @@ paths:
           description: user was found and profile details returned.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/User" }
+              schema: { $ref: "#/components/schemas/user" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
@@ -157,14 +170,14 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/Username" }
+            schema: { $ref: "#/components/schemas/username" }
 
       responses:
         "200": 
           description: user details successfully modified.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/User" }
+              schema: { $ref: "#/components/schemas/user" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
@@ -185,7 +198,7 @@ components:
       name: userID
       required: true
       in: path
-      schema: { $ref: "#/components/schemas/ResourceId" }
+      schema: { $ref: "#/components/schemas/token" }
 
   responses:
     BadRequestError:
@@ -246,11 +259,14 @@ components:
             properties:
               users: { $ref: "#/components/schemas/UserList" }
     
-  
-  
-
-
   schemas:
+    profilePicture: 
+      description: profile picture(idk later will add)
+    email: 
+      description: email of user 
+      type: string
+      maxLength: 30
+      minLength: 3 
     password: 
       description: a user password
       type: string
@@ -262,7 +278,7 @@ components:
       minLength: 0
       maxLength: 250
       readOnly: true
-    Username:
+    username:
         type: string
         example: de.dead.b33f_03
         pattern: "^[a-zA-Z][\\.]{0,1}(?:[\\w][\\.]{0,1})*[\\w]$"
@@ -278,7 +294,7 @@ components:
           - Max 25 characters 
 
 
-    ResourceId:
+    token:
       description: |
         The Unique Resource Id of an element, be it a user, photo or comment.
     
@@ -297,7 +313,7 @@ components:
       maxLength: 2000
 
 
-    User:
+    user:
       description: |
         Resource representing a user. It contains information about the user, including:
         - the `userId`, enabling to perform actions on the user's resources.
@@ -305,15 +321,15 @@ components:
       
       type: object
       properties:
-        userId: { $ref: "#/components/schemas/ResourceId" }
-        username: { $ref: "#/components/schemas/Username" }
-    
+        token: { $ref: "#/components/schemas/token" }
+        username: { $ref: "#/components/schemas/username" }
+        
     UserList:
       description: |
         an array of `User`, to be displayed in search queries.
         it should be included in an object and be named `users`, as in UserListResponse. 
       type: array
-      items: { $ref: "#/components/schemas/User" }
+      items: { $ref: "#/components/schemas/user" }
       minItems: 0
       maxItems: 24
 

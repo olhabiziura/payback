@@ -7,14 +7,14 @@ class GroupSerializer(serializers.ModelSerializer):
     # this is modelSerializer, instead of defining fields, we just use them from models.py  
     class Meta: 
         model = Group
-        fields = ['id', 'name', 'users', 'amount', 'created', 'debts']
+        fields = ['id', 'name', 'users', 'amount', 'debts']
 
 
 # serializer for Custom User model
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
-        fields = ['id', 'username', 'email', 'debt', 'groups', 'profilePicture', 'date_joined']
+        fields = ['id', 'username', 'email',  'profilePicture']
 
 
 

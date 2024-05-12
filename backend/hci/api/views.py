@@ -37,51 +37,57 @@ def test_token(request):
     # curl -X 'PUT'  'http://localhost:8000/users/1'  -H 'accept: application/json'  -H 'Content-Type: multipart/form-data' -F'username=hci' -F 'profilePicture=@C:/Users/mediolanum/Desktop/metamodern/slava.png;type=image/png'          
 
 
+# API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
+class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
+     queryset = Debt.objects.all()
+     serializer_class = DebtSerializer
 
-
-# API endpoint for changing value of debt 
-class DebtDetail(APIView):
-
-    def get_debt(self, id):
+     lookup_field = 'id'
+     def get_debt(self, id):
         try: 
             return Debt.objects.get(id = id)
         except Debt.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
     # func for getting the group with specific id
-    def get_group(self, id):
+     def get_group(self, id):
         try: 
            return Group.objects.get(id=id)
         except Group.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-    def get_user(self, username): 
+     def get_user(self, username): 
         try: 
              return  User.objects.get(username = username)
         except User.DoesNotExist:
              return HttpResponse(status=404)
     
-    def post(self,request, id): 
+     def get(self, request, id): 
+          return self.retrieve(request)
+     
+     def post(self, request, id):
         group = self.get_group(id)
         serializer = DebtSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             debt = self.get_debt(serializer.data['id'])
             group.debts = debt  
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
-    
-
-
-    def put(self, request, id): 
+            group.save()
+            return self.create(request)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+     
+     def put(self, request, id): 
         group = self.get_group(id)
         request_username = request.data["username"]
         user = self.get_user(request_username)
         debt = group.debts 
         serializer = DebtSerializer(debt, data = request.data)
         if serializer.is_valid():
-
-             return JsonResponse(serializer.data, status=200, safe=False)
+             group.debts = request.data
+             group.save()
+             return self.update(request)
         return JsonResponse(serializer.errors, status=400)
+    
+
 
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users

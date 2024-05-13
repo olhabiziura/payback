@@ -181,7 +181,23 @@ paths:
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
-
+  /groups/: 
+    description: endpoint of list of groups
+    get:
+      tags: ["group"]
+      summary: get groups collection
+      description: |
+          return list of all groups, later will be added fucntionality to get list of groups with specific name or with name that partially or fully match the querry search name
+      operationId: getGroups
+      responses:
+        "200": { $ref: "#/components/responses/groupListResponse" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        # No 403: User will not see banned users
+        # No 404: 404 would be 200 empty-userListResponse
+        "500": { $ref: "#/components/responses/ServerError" }
+  
+    
 components:
   parameters:
     UserID:
@@ -197,6 +213,13 @@ components:
       schema: { $ref: "#/components/schemas/token" }
 
   responses:
+    groupListResponse: 
+      description: returns list of groups successfully
+      content: 
+        application/json:   
+          schema: 
+            { $ref: "#/components/schemas/groups" }
+          
     BadRequestError:
       description: request not compliant with REST API specifications.
       content:
@@ -257,8 +280,12 @@ components:
     
   schemas:
     groups: 
-      description: | 
-         a collection of groups 
+      description: a set of groups
+      type: array
+      items: 
+        { $ref: "#/components/schemas/group"} 
+    group: 
+      description: a group of users that share expenses
       type: object
       properties: 
         id: 
@@ -356,14 +383,29 @@ components:
 
     user:
       description: |
-        Resource representing a user. It contains information about the user, including:
-        - the `userId`, enabling to perform actions on the user's resources.
-        - the `username`.
+        a user object. 
       
       type: object
       properties:
         token: { $ref: "#/components/schemas/token" }
         username: { $ref: "#/components/schemas/username" }
+        email: { $ref: "#/components/schemas/email"} 
+        owns: 
+          description: boolean field that describes if user has any debt
+          type: boolean
+          readOnly: true
+          example: false
+        groups: 
+          { $ref: "#/components/schemas/groups" } 
+        profilePicture: 
+          { $ref: "#/components/schemas/profilePicture" }
+        dateJoined: 
+          description: a date when user joined an app
+          readOnly: true
+          type: string
+          format: date
+          example: 2011-11-11
+
         
     userList:
       description: |

@@ -39,10 +39,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
-
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
-
     objects = CustomUserManager()
 
     def __str__(self):
@@ -51,11 +49,40 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
-    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL)
+
+    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, choices=[])
+    
     # debts of each user 
-    debts = models.TextField()
+    debts_amounts = models.TextField()
     def __str__(self):
-        return self.debts
+        return self.debts_amounts
+    
+    @property
+    def get_group(self): 
+        return self.Group.all()
+
+    @property
+    def users_choices(self): 
+        group = self.get_group()
+        print(group, 'asdasdasdad')
+        return list(group.users)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._update_user_choices()
+
+    def _update_user_choices(self):
+        if self.pk:  # Check if the instance has been saved to the database
+            # Get the users related to this Debt instance
+            users = self.group_set.all()
+            print(users)
+            #users = group.users
+            # Construct choices based on the related users
+            self._meta.get_field('user_owner').choices = [(user.users, user.users) for user in users]
+        else:
+            # If the instance hasn't been saved yet, set choices to an empty list
+            self._meta.get_field('user_owner').choices = []
+    
 # to migrate:
     # 1. add app to settings settings.py
     # 2. use python manage.py makemigrations   

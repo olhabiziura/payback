@@ -14,10 +14,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import SessionAuthentication,TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+import logging
 
 
 # Create your views here.
-
+logger = logging.getLogger(__name__)
 
 
 
@@ -48,6 +49,7 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
             return Debt.objects.get(id = id)
         except Debt.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+        
     # func for getting the group with specific id
      def get_group(self, id):
         try: 
@@ -65,14 +67,14 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
           return self.retrieve(request)
      
      def post(self, request, id):
+        logger.debug("POST request received")
         group = self.get_group(id)
         serializer = DebtSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            debt = self.get_debt(serializer.data['id'])
-            group.debts = debt  
-            group.save()
-            return self.create(request)
+            debt = serializer.save()
+            group.debts.add(debt)  
+            logger.debug("Debt added to group")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
      
      def put(self, request, id): 
@@ -86,8 +88,6 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
              group.save()
              return self.update(request)
         return JsonResponse(serializer.errors, status=400)
-    
-
 
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
@@ -111,6 +111,7 @@ class Signup(generics.GenericAPIView, mixins.CreateModelMixin):
              user.set_password(request.data['password'])
              user.save()
              token = Token.objects.create(user=user)
+             serializer = UserSerializer(user)
              return Response({"token":token.key, "user":serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
 
@@ -141,6 +142,7 @@ class UserDetailViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin ,  mi
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+     
 
 
 

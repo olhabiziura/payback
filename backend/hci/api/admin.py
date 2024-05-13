@@ -14,5 +14,5 @@ class GroupModel(admin.ModelAdmin):
 
 @admin.register(User)
 class UserModel(admin.ModelAdmin):
-    list_filter = ('username','debt', 'groups')
+    list_filter = ('username','owns', 'groups')
     list_display = ('id', 'username')

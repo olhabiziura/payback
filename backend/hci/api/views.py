@@ -39,14 +39,18 @@ def test_token(request):
 
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
-class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
+class DebtDetail(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
      queryset = Debt.objects.all()
      serializer_class = DebtSerializer
 
      lookup_field = 'id'
-     def get_debt(self, id):
+     def get_debt(self,group_id, debt_id):
         try: 
-            return Debt.objects.get(id = id)
+            group = Group.objects.get(id = group_id)
+            debt = Debt.objects.get(id = debt_id)
+     
+            serializer = DebtSerializer(debt)
+            return serializer
         except Debt.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
@@ -63,10 +67,11 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
         except User.DoesNotExist:
              return HttpResponse(status=404)
     
-     def get(self, request, id): 
-          return self.retrieve(request)
+     def get(self, request, group_id, debt_id): 
+         
+          return Response(self.get_debt(group_id, debt_id).data, status=status.HTTP_200_OK)
      
-     def post(self, request, id):
+     def post(self, request, _, id):
         logger.debug("POST request received")
         group = self.get_group(id)
         serializer = DebtSerializer(data=request.data)

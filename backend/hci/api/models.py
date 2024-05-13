@@ -78,7 +78,7 @@ class Debt(models.Model):
             print(users)
             #users = group.users
             # Construct choices based on the related users
-            self._meta.get_field('user_owner').choices = [(user.users, user.users) for user in users]
+            self._meta.get_field('user_owner').choices = [("User", User) for User.users in users]
         else:
             # If the instance hasn't been saved yet, set choices to an empty list
             self._meta.get_field('user_owner').choices = []

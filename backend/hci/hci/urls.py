@@ -31,7 +31,7 @@ urlpatterns = [
     path('groups/', GroupList.as_view() ),
     path('users/', UserList.as_view()),
     path('groups/<int:id>/', GroupDetail.as_view()),
-    path('groups/<int:id>/debt', DebtDetail.as_view()),
+    path('groups/<int:group_id>/debt/<int:debt_id>', DebtDetail.as_view()),
     re_path('login', Login.as_view()) ,
     re_path('signup',Signup.as_view()),
     re_path('test_token',test_token)

@@ -72,16 +72,7 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
          
           return Response(self.get_debt(group_id, debt_id).data, status=status.HTTP_200_OK)
      
-     def post(self, request, id):
-        logger.debug("POST request received")
-        group = self.get_group(id)
-        serializer = DebtSerializer(data=request.data)
-        if serializer.is_valid():
-            debt = serializer.save()
-            group.debts.add(debt)  
-            logger.debug("Debt added to group")
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
      
      def put(self, request, id): 
         group = self.get_group(id)
@@ -98,8 +89,9 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
 class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
      queryset = Debt.objects.all() 
-     serializer_class = GroupSerializer
-             
+     serializer_class = DebtSerializer
+     
+     lookup_field = "group_id"
     # func for getting the group with specific id
      def get_group(self, id):
         try: 
@@ -109,19 +101,30 @@ class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
 
      def get(self, request, group_id): 
           group = self.get_group(group_id)
-          serializer = DebtSerializer(group.debts)
-          return Response(serializer.data, status=status.HTTP_200_OK)
+          if group.debts: 
+               serializer = DebtSerializer(group.debts, many=True)
+              
+               return Response(serializer.data, status=status.HTTP_200_OK)
+          else: 
+                return Response({"message": "No data available"}, status=status.HTTP_200_OK)
      
-     def post(self, request): 
-         return self.create(request)
-
+     def post(self, request, group_id): 
+        logger.debug("POST request received")
+        group = self.get_group(group_id)
+        serializer = DebtSerializer(data=request.data)
+        if serializer.is_valid():
+            debt = serializer.save()
+            group.debts.add(debt)  
+            logger.debug("Debt added to group")
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
 class GroupList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
      queryset = Group.objects.all()
      serializer_class = GroupSerializer
 
      def get(self, request): 
-          return self.list(request)
+          return self.list(request)     
      
      def post(self, request): 
          return self.create(request)
@@ -196,14 +199,16 @@ class GroupDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Upd
      serializer_class = GroupSerializer
 
     # otherwise it will look up for pk
-     lookup_field = 'id'
+     lookup_field = 'group_id'
 
-     def get(self, request, id): 
-          return self.retrieve(request, id = id)
+     def get(self, request, group_id): 
+          group = Group.objects.get(id=group_id)
+          serializer = GroupSerializer(group)
+          return Response(serializer.data, status=status.HTTP_200_OK)
      
-     def put(self, request, id): 
-         return self.update(request, id = id)
+     def put(self, request, group_id): 
+         return self.update(request, id = group_id)
      
-     def delete(self, request, id):
-         return self.destroy(request, id = id)
-     
+     def delete(self, request, group_id):
+         return self.destroy(request, id = group_id)
+   

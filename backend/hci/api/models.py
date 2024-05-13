@@ -10,16 +10,16 @@ from .managers import CustomUserManager
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Group(models.Model): 
     # name of the group 
-    name = models.CharField(max_length=100) 
+    name = models.CharField(max_length=100, unique=True) 
     # collection of users in the group (for now its in text field, later maybe change to more apropriate field type). I use User in '' 
     # since python doesnt have forward declaration and  i cant point to User class declared below lol 
     users = models.ManyToManyField('User')  
     # the amount of money that users needed to share 
     amount = models.PositiveIntegerField(blank=True, null=True)
     # date and time when the group was created 
-    created = models.DateField(timezone.now(), default='1111-11-11')
+    created = models.DateField(default=timezone.now())
     # debts of each user 
-    debts = models.ManyToManyField('Debt')
+    debts = models.ManyToManyField('Debt', blank=True)
 
     def __str__(self):
         return self.name
@@ -46,14 +46,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-CHOICES = [
-    ('value1', 'Label 1'),
-    ('value2', 'Label 2'),
-    ]
+
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
 
-    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, choices=CHOICES)
+    user_owner = models.ForeignKey(User,default=1, null=True, on_delete=models.CASCADE, choices=[])
     
 
     # debts of each user 
@@ -73,7 +70,7 @@ class Debt(models.Model):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._update_user_choices()
+       
 
     def _update_user_choices(self):
         if self.pk:  # Check if the instance has been saved to the database
@@ -84,8 +81,8 @@ class Debt(models.Model):
             #users = group.users
             # Construct choices based on the related users
             # self.user_owner.choices = [(a, a) for a in users]
-            self.user_owner.choices = CHOICES
             print(self.user_owner)
+            self._meta.get_field('user_owner').choices = users
         else:
             # If the instance hasn't been saved yet, set choices to an empty list
             self._meta.get_field('user_owner').choices = []

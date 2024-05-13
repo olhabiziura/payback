@@ -39,7 +39,7 @@ def test_token(request):
 
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
-class DebtDetail(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
+class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
      queryset = Debt.objects.all()
      serializer_class = DebtSerializer
 
@@ -48,7 +48,8 @@ class DebtDetail(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMo
         try: 
             group = Group.objects.get(id = group_id)
             debt = Debt.objects.get(id = debt_id)
-     
+            debt._update_user_choices()
+            debt.save()
             serializer = DebtSerializer(debt)
             return serializer
         except Debt.DoesNotExist:
@@ -71,7 +72,7 @@ class DebtDetail(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMo
          
           return Response(self.get_debt(group_id, debt_id).data, status=status.HTTP_200_OK)
      
-     def post(self, request, _, id):
+     def post(self, request, id):
         logger.debug("POST request received")
         group = self.get_group(id)
         serializer = DebtSerializer(data=request.data)
@@ -93,7 +94,26 @@ class DebtDetail(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMo
              group.save()
              return self.update(request)
         return JsonResponse(serializer.errors, status=400)
+     
+# API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
+class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):
+     queryset = Debt.objects.all() 
+     serializer_class = GroupSerializer
+             
+    # func for getting the group with specific id
+     def get_group(self, id):
+        try: 
+           return Group.objects.get(id=id)
+        except Group.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
+     def get(self, request, group_id): 
+          group = self.get_group(group_id)
+          serializer = DebtSerializer(group.debts)
+          return Response(serializer.data, status=status.HTTP_200_OK)
+     
+     def post(self, request): 
+         return self.create(request)
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
 class GroupList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateModelMixin):

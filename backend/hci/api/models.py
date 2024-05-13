@@ -46,12 +46,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-
+CHOICES = [
+    ('value1', 'Label 1'),
+    ('value2', 'Label 2'),
+    ]
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
 
-    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, choices=[])
+    user_owner = models.ForeignKey(User, null=True, default=None, on_delete=models.SET_NULL, choices=CHOICES)
     
+
     # debts of each user 
     debts_amounts = models.TextField()
     def __str__(self):
@@ -74,11 +78,14 @@ class Debt(models.Model):
     def _update_user_choices(self):
         if self.pk:  # Check if the instance has been saved to the database
             # Get the users related to this Debt instance
-            users = self.group_set.all()
-            print(users)
+            print(self.group_set.all(), "--------------------------------------------------------------------------------")
+            users = self.group_set.all().first().users.all()
+            print(users, "asdasd")
             #users = group.users
             # Construct choices based on the related users
-            self._meta.get_field('user_owner').choices = [("User", User) for User.users in users]
+            # self.user_owner.choices = [(a, a) for a in users]
+            self.user_owner.choices = CHOICES
+            print(self.user_owner)
         else:
             # If the instance hasn't been saved yet, set choices to an empty list
             self._meta.get_field('user_owner').choices = []

@@ -50,42 +50,34 @@ class User(AbstractBaseUser, PermissionsMixin):
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
 
-    user_owner = models.ForeignKey(User,default=1, null=True, on_delete=models.CASCADE, choices=[])
-    
+    user_owner = models.ForeignKey(User,default=1, null=True, on_delete=models.CASCADE)
+        
 
     # debts of each user 
     debts_amounts = models.TextField()
     def __str__(self):
         return self.debts_amounts
     
-    @property
-    def get_group(self): 
-        return self.Group.all()
-
-    @property
-    def users_choices(self): 
-        group = self.get_group()
-        print(group, 'asdasdasdad')
-        return list(group.users)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
        
+    def save(self, *args, **kwargs):
+        # Call the method to update user choices before saving
+        self._update_user_choices()
+        super().save(*args, **kwargs)
 
     def _update_user_choices(self):
-        if self.pk:  # Check if the instance has been saved to the database
-            # Get the users related to this Debt instance
-            print(self.group_set.all(), "--------------------------------------------------------------------------------")
-            users = self.group_set.all().first().users.all()
-            print(users, "asdasd")
-            #users = group.users
+        if self.id:  # Check if the instance has a related group       
+            # Get the users related to this Debt instance's group
+            users = self.group_set.first().users.all()      
             # Construct choices based on the related users
-            # self.user_owner.choices = [(a, a) for a in users]
-            print(self.user_owner)
-            self._meta.get_field('user_owner').choices = users
+            self._meta.get_field('user_owner').choices = [(user.id, user.username) for user in users]
+            super().save()
+
         else:
-            # If the instance hasn't been saved yet, set choices to an empty list
-            self._meta.get_field('user_owner').choices = []
+            # If the instance doesn't have a related group, set choices to an empty list
+            self._meta.get_field('user_owner').choices = [] 
     
 # to migrate:
     # 1. add app to settings settings.py

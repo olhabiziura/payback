@@ -74,12 +74,9 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
      
 
      
-     def put(self, request, id): 
-        group = self.get_group(id)
-        request_username = request.data["username"]
-        user = self.get_user(request_username)
-        debt = group.debts 
-        serializer = DebtSerializer(debt, data = request.data)
+     def put(self, request, group_id, debt_id): 
+        group = self.get_group(group_id)
+        serializer = DebtSerializer(group.debts.set(Debt).get(id=debt_id), data = request.data     )
         if serializer.is_valid():
              group.debts = request.data
              group.save()
@@ -102,8 +99,10 @@ class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
      def get(self, request, group_id): 
           group = self.get_group(group_id)
           if group.debts: 
+               for i in group.debts.all():
+                   i.save()
                serializer = DebtSerializer(group.debts, many=True)
-              
+
                return Response(serializer.data, status=status.HTTP_200_OK)
           else: 
                 return Response({"message": "No data available"}, status=status.HTTP_200_OK)

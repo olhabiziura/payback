@@ -19,7 +19,7 @@ tags:
   
 
 security:
-  - bearerAuthentication: []
+  - tokenAuthentication: []
 
 
 paths:
@@ -126,18 +126,19 @@ paths:
         # No 404: 404 would be 200 empty-userListResponse
         "500": { $ref: "#/components/responses/ServerError" }
   
-  /users/{userID}:
+  /users/{userId}/:
     description: endpoint for retrieving a user with specific id
     parameters:
-      - $ref: "#/components/parameters/id"
+       - name: userId
+         in: path
+         required: true
+         schema: 
+           $ref: "#/components/parameters/id"
     get:
       tags: ["user"]
       summary: get a user's profile given the user Identifier
       description: |
         get a user's profile details given their user identifier.
-        The remaining content of the profile (i.e. the photo binary),
-        must be requested through the dedicated endpoint: `/photos/{photoID}/`.
-
         An authenticated session is requested to perform this action, 
         due to privacy and ban-related reasons.
 
@@ -245,22 +246,18 @@ paths:
         schema: {$ref: "#/components/parameters/id" }
     get:
       tags: ["group"]
-      summary: get a user's profile given the user Identifier
+      summary: get a group details given the group Identifier
       description: |
-        get a user's profile details given their user identifier.
-        The remaining content of the profile (i.e. the photo binary),
-        must be requested through the dedicated endpoint: `/photos/{photoID}/`.
-
+        returns a group details given group's id.
         An authenticated session is requested to perform this action, 
         due to privacy and ban-related reasons.
-
       operationId: getGroup
       responses:
         "200":
-          description: user was found and profile details returned.
+          description: group was found and profile details returned.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user" }
+              schema: { $ref: "#/components/schemas/group" }
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
@@ -271,7 +268,7 @@ paths:
       tags: ["group"]
       summary: update a user's profile with new data 
       description: |
-        changes user's details with a new given one. For now you can change only username, email and profile picture
+        changes group's details with a new given one.
       operationId: updateGroup
       requestBody:
         required: true
@@ -280,10 +277,14 @@ paths:
             schema: 
              description: fields to update 
              properties: 
-                username:  { $ref: "#/components/schemas/username" }
-                email:  { $ref: "#/components/schemas/email" }
-                groups: { $ref: "#/components/schemas/groups" }
-                profilePicture: { $ref: "#/components/schemas/profilePicture" }
+                name: 
+                  description: unique name of a group
+                  type: string
+                  example: hci
+                  minLength: 3
+                  maxLength: 15
+                users: 
+                   $ref: "#/components/schemas/users"
       responses:
         "200":
           description: user was found and profile details returned.
@@ -296,18 +297,62 @@ paths:
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
     delete: 
-      tags: ["user"]
-      summary: delete user with given userId 
+      tags: ["group"]
+      summary: delete group with given groupId 
       operationId: deleteGroup
       responses: 
         "204":
-          description: user was deleted
+          description: group was deleted
         "400": { $ref: "#/components/responses/BadRequestError" }
         "401": { $ref: "#/components/responses/AuthorizationError" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
-      
+  /gruops/{groupId}/debts/:
+    description: |
+           endpoint of list of debts related to group with given groupId
+    parameters: 
+      - name:  groupId
+        in: path
+        required: true
+        schema: {$ref: "#/components/parameters/id" }
+    get:
+      tags: ["debts"]
+      summary: get debts collection
+      description: |
+          return list of all debts related to group with given groupId
+      operationId: getDebts
+      responses:
+        "200": { $ref: "#/components/responses/debtsListResponse" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        # No 403: User will not see banned users
+        # No 404: 404 would be 200 empty-userListResponse
+        "500": { $ref: "#/components/responses/ServerError" }
+    post: 
+      tags: ["debts"]
+      summary: create a new debt
+      description: |
+        creates a new debt with data given in request 
+      operationId: createDebt
+      requestBody: 
+        description: debt details
+        required: true
+        content: 
+          application/json: 
+            schema: 
+              { $ref: "#/components/schemas/debt" }
+          
+      responses: 
+        "201":
+          description: created debt succ 
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/debt" }
+        # No 401
+        # No 403
+        # No 404
+        "500": { $ref: "#/components/responses/ServerError" }
 components:
   parameters:
     id:
@@ -369,7 +414,20 @@ components:
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }
+    debtsListResponse:
+      description: |
+        returns a list of debts to be displayed at the client.
+        The array may or may not contain elements.
 
+      content: 
+        application/json:
+          schema: 
+            description: |
+              the list of debts to be displayed at the client.
+              The array may or may not contain elements
+            type: object
+            properties:
+              debts: { $ref: "#/components/schemas/debts" }
     userListResponse:
       description: |
         returns a list of users to be displayed at the client.
@@ -384,7 +442,6 @@ components:
             type: object
             properties:
               users: { $ref: "#/components/schemas/userList" }
-    
   schemas:
     groups: 
       description: a set of groups
@@ -420,7 +477,6 @@ components:
           type: array
           items: 
             {$ref: "#/components/schemas/debt"}
-        
     debt: 
       description: a debt 
       type: object
@@ -476,7 +532,14 @@ components:
       type: string
       example: 7ecfb6d7e79df69c34d448d17a92151211498ba
       readOnly: true
-     
+    debts: 
+      description: collection of debts 
+      type: array
+      items: {$ref: "#/components/schemas/debt"}
+    users: 
+      description: collection of users 
+      type: array
+      items: {$ref: "#/components/schemas/user"}
 
     user:
       description: |
@@ -516,7 +579,7 @@ components:
   
 
   securitySchemes:
-    bearerAuthentication:
+    tokenAuthentication:
       description: |
         User authentication with the user ID passed
         as an authentication token.

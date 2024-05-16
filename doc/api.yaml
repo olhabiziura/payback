@@ -197,7 +197,7 @@ paths:
   /groups/: 
     description: endpoint of list of groups
     get:
-      tags: ["group"]
+      tags: ["groups"]
       summary: get groups collection
       description: |
           return list of all groups, later will be added fucntionality to get list of groups with specific name or with name that partially or fully match the querry search name
@@ -210,7 +210,7 @@ paths:
         # No 404: 404 would be 200 empty-userListResponse
         "500": { $ref: "#/components/responses/ServerError" }
     post: 
-      tags: ["group"]
+      tags: ["groups"]
       summary: create a new group
       description: |
         creates a new group with data given in request 
@@ -242,7 +242,72 @@ paths:
       - name:  groupId
         in: path
         required: true
-        schema: {$ref: "#/components/parameters/id" } 
+        schema: {$ref: "#/components/parameters/id" }
+    get:
+      tags: ["group"]
+      summary: get a user's profile given the user Identifier
+      description: |
+        get a user's profile details given their user identifier.
+        The remaining content of the profile (i.e. the photo binary),
+        must be requested through the dedicated endpoint: `/photos/{photoID}/`.
+
+        An authenticated session is requested to perform this action, 
+        due to privacy and ban-related reasons.
+
+      operationId: getGroup
+      responses:
+        "200":
+          description: user was found and profile details returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+
+    put: 
+      tags: ["group"]
+      summary: update a user's profile with new data 
+      description: |
+        changes user's details with a new given one. For now you can change only username, email and profile picture
+      operationId: updateGroup
+      requestBody:
+        required: true
+        content: 
+          application/json: 
+            schema: 
+             description: fields to update 
+             properties: 
+                username:  { $ref: "#/components/schemas/username" }
+                email:  { $ref: "#/components/schemas/email" }
+                groups: { $ref: "#/components/schemas/groups" }
+                profilePicture: { $ref: "#/components/schemas/profilePicture" }
+      responses:
+        "200":
+          description: user was found and profile details returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete: 
+      tags: ["user"]
+      summary: delete user with given userId 
+      operationId: deleteGroup
+      responses: 
+        "204":
+          description: user was deleted
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+      
 components:
   parameters:
     id:

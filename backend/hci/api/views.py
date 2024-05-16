@@ -43,6 +43,9 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Dest
      queryset = Debt.objects.all()
      serializer_class = DebtSerializer
 
+
+
+    
      def get_debt(self,group_id, debt_id):
         try: 
             group = Group.objects.get(id = group_id)
@@ -70,6 +73,8 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Dest
     
      def get(self, request, group_id, debt_id): 
           try: 
+        # !!!!!!!!!!! later make better checks for existence of group or debt or if debt belongs to group 
+        # need to make separate functions, and also add checks for other methods too
             if not Group.objects.filter(id = group_id):
                 return Response({"message": "group with given group_id does not exists"}, status=status.HTTP_404_NOT_FOUND)
             group = Group.objects.get(id = group_id)

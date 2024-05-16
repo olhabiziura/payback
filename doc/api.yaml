@@ -127,7 +127,7 @@ paths:
         "500": { $ref: "#/components/responses/ServerError" }
   
   /users/{userId}/:
-    description: endpoint for retrieving a user with specific id
+    description: endpoint for operations related to user 
     parameters:
        - name: userId
          in: path
@@ -136,11 +136,11 @@ paths:
            $ref: "#/components/parameters/id"
     get:
       tags: ["user"]
-      summary: get a user's profile given the user Identifier
+      summary: retuns a user details of user with given userID
       description: |
         get a user's profile details given their user identifier.
-        An authenticated session is requested to perform this action, 
-        due to privacy and ban-related reasons.
+        An authenticated session is requested to perform this and all other operations except of /login and /signup 
+        due to privacy 
 
       operationId: getUserProfile
       responses:
@@ -535,7 +535,7 @@ components:
               user: { $ref: "#/components/schemas/user" } 
   schemas:
     groups: 
-      description: a set of groups
+      description: a collection of groups 
       type: array
       items: 
         { $ref: "#/components/schemas/group"} 
@@ -555,7 +555,9 @@ components:
         users: 
           { $ref: "#/components/schemas/userList" }
         amount: 
-          description: the amount of debt of all users 
+          description: |
+              the amount of debt of all users, idk why i added this, 
+              but let it be for now 
           type: integer
           example: 300
         created: 

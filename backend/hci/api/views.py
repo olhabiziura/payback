@@ -43,15 +43,15 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Dest
      queryset = Debt.objects.all()
      serializer_class = DebtSerializer
 
-     lookup_field = 'id'
      def get_debt(self,group_id, debt_id):
         try: 
             group = Group.objects.get(id = group_id)
-            debt = Debt.objects.get(id = debt_id)
-            debt._update_user_choices()
-            debt.save()
-            serializer = DebtSerializer(debt)
-            return serializer
+            if  group.debts.get(id = debt_id).exists(): 
+                 debt = group.debts.get(id = debt_id)
+                 serializer = DebtSerializer(debt)
+                 return serializer
+            return Response(status=status.HTTP_404_NOT_FOUND)
+            
         except Debt.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
@@ -69,8 +69,19 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Dest
              return HttpResponse(status=404)
     
      def get(self, request, group_id, debt_id): 
-         
-          return Response(self.get_debt(group_id, debt_id).data, status=status.HTTP_200_OK)
+          try: 
+            if not Group.objects.filter(id = group_id):
+                return Response({"message": "group with given group_id does not exists"}, status=status.HTTP_404_NOT_FOUND)
+            group = Group.objects.get(id = group_id)
+            if   group.debts.filter(id = debt_id).exists():
+                 debt = group.debts.get(id = debt_id)
+                 serializer = DebtSerializer(debt)
+                 return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"message": "debt with given debt_id does not belong to group"}, status=status.HTTP_404_NOT_FOUND)
+             
+          except Debt.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
      
      def delete(self, request, group_id, debt_id):
          return self.destroy(request,id = debt_id)

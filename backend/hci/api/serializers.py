@@ -8,7 +8,7 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Group
         fields = ['id', 'name', 'users', 'amount', 'debts']
-
+        read_only_fields = ['debts', "amount"]
 
 # serializer for Custom User model
 class UserSerializer(serializers.ModelSerializer):
@@ -35,4 +35,5 @@ class LoginRequestSerializer(serializers.ModelSerializer):
 class DebtSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Debt
-        fields = ['id', 'debts_amounts', 'user_owner']
+        fields = ['id', 'debts_amounts',"debt_participants", 'user_owner']
+       # read_only_fields = ['debts_amounts']

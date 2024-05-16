@@ -74,7 +74,13 @@ class Debt(models.Model):
             if i not in self.group_set.first().users.all():
                 return False
         return True
-       
+    @classmethod
+    def exists(cls, **kwargs):
+        """
+        Custom method to check if an instance of the model exists based on certain criteria.
+        Example usage: YourModel.exists(field1=value1, field2=value2)
+        """
+        return cls.objects.filter(**kwargs).exists()
 
     
 # to migrate:

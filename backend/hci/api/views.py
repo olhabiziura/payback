@@ -39,7 +39,7 @@ def test_token(request):
 
 
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users
-class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin):
+class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, mixins.UpdateModelMixin):
      queryset = Debt.objects.all()
      serializer_class = DebtSerializer
 
@@ -72,7 +72,8 @@ class DebtDetail(generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.Crea
          
           return Response(self.get_debt(group_id, debt_id).data, status=status.HTTP_200_OK)
      
-
+     def delete(self, request, group_id, debt_id):
+         return self.destroy(request,id = debt_id)
      
      def put(self, request, group_id, debt_id): 
         group = self.get_group(group_id)
@@ -115,6 +116,9 @@ class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
             debt = serializer.save()
             group.debts.add(debt)  
             logger.debug("Debt added to group")
+            if debt.check_owner() == False or debt.check_participants() == False:
+                debt.delete_self()
+                return Response({"message": "user owner or participants are not in the group"}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users

@@ -10,12 +10,13 @@ servers:
     description: localhost server, for development purposses.
 
 tags:
-  - name: session
-    description: Operations related to session management.
-
+  - name: login
+    description: Operations related to login management.
+  - name: signup
+    description: Operations related to signup process
   - name: user
     description: Operations related to profile management and users' search.  
-
+  
 
 security:
   - bearerAuthentication: []
@@ -128,7 +129,7 @@ paths:
   /users/{userID}:
     description: endpoint for retrieving a user with specific id
     parameters:
-      - $ref: "#/components/parameters/UserID"
+      - $ref: "#/components/parameters/id"
     get:
       tags: ["user"]
       summary: get a user's profile given the user Identifier
@@ -181,6 +182,18 @@ paths:
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
+    delete: 
+      tags: ["user"]
+      summary: delete user with given userId 
+      operationId: deleteUser
+      responses: 
+        "204":
+          description: user was deleted
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+        "500": { $ref: "#/components/responses/ServerError" }
   /groups/: 
     description: endpoint of list of groups
     get:
@@ -196,18 +209,47 @@ paths:
         # No 403: User will not see banned users
         # No 404: 404 would be 200 empty-userListResponse
         "500": { $ref: "#/components/responses/ServerError" }
+    post: 
+      tags: ["group"]
+      summary: create a new group
+      description: |
+        creates a new group with data given in request 
+      operationId: createGroup
+      requestBody: 
+        description: user signup details
+        required: true
+        content: 
+          application/json: 
+            schema: 
+              { $ref: "#/components/schemas/group" }
+          
+      responses: 
+        "201":
+          description: created group succ 
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/group" }
+        # No 401
+        # No 403
+        # No 404
+        "500": { $ref: "#/components/responses/ServerError" }
   
-    
+  /groups/{groupId}/: 
+    description: | 
+      endpoint related to operations with single group with given 
+      groupId
+    parameters: 
+      - name:  groupId
+        in: path
+        required: true
+        schema: {$ref: "#/components/parameters/id" } 
 components:
   parameters:
-    UserID:
+    id:
       description: |
-        Value representing the unique identifier of a user.
-        The UserID is employed whenever information or actions on a generic
-        user is requested by the sender, for example listing the user details,
-        following/banning a user.
+        a unique identification number. Users, groups, debts have their own unique number.
 
-      name: userID
+      name: id
       required: true
       in: path
       schema: { $ref: "#/components/schemas/token" }
@@ -254,7 +296,7 @@ components:
     NotFoundError:
       description: |
         the resource was not found: 
-        - if searching for a user: the UserID doesn't exist.
+        - if searching for a user: the id doesn't exist.
         - if searching for a photo: the photoId doesn't exist.
         - if searching for a comment: the photoId or the commentID don't exist. 
         
@@ -348,9 +390,9 @@ components:
       readOnly: true
     username:
         type: string
-        example: de.dead.b33f_03
+        example: hci
         pattern: "^[a-zA-Z][\\.]{0,1}(?:[\\w][\\.]{0,1})*[\\w]$"
-        minLength: 5
+        minLength: 3
         maxLength: 25
         description: |
           User's personal and unique username, used during login. It has the follwing properties:
@@ -358,7 +400,7 @@ components:
           - Beginning period not matched (`.discodude` 400)
           - Ending period NOT matched (`discodude.` 400)
           - Match underscores (`_disco__dude_` 200)
-          - Min 5 characters 
+          - Min 3 characters 
           - Max 25 characters 
 
 
@@ -366,20 +408,10 @@ components:
       description: |
         The Unique Resource Id of an element, be it a user, photo or comment.
     
-      type: integer
-      example: 4902
-      readOnly: true
-      maximum: 18446744073709551615 # 2^64-1 
-      minimum: 0
-
-    Text:
-      description: Generic text. All user-inserted text-blocks will have this format.
       type: string
-      example: Si sta come d'autunno sugli alberi le foglie
-      pattern: ".*"
-      minLength: 0
-      maxLength: 2000
-
+      example: 7ecfb6d7e79df69c34d448d17a92151211498ba
+      readOnly: true
+     
 
     user:
       description: |

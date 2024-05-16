@@ -20,6 +20,8 @@ class Group(models.Model):
     created = models.DateField(default=timezone.now())
     # debts of each user 
     debts = models.ManyToManyField('Debt', blank=True)
+    debt_counter = models.TextField()
+    rem_counter = models.TextField()
 
     def __str__(self):
         return self.name
@@ -28,7 +30,7 @@ class Group(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     # a unique username 
     username = models.CharField(max_length=20, unique=True)
-    # email 
+    # email of a user 
     email = models.EmailField()
     # a boolean value debt indicating whether user has unpaid debt in any of groups he is in or not
     owns = models.BooleanField(default=False)
@@ -49,35 +51,31 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 # model of Group - collection of users that want to share expenses (idk how it should be, its for learning purposes)
 class Debt(models.Model): 
-
-    user_owner = models.ForeignKey(User,default=1, null=True, on_delete=models.CASCADE)
-        
-
+    # the user that paid for stuff and other users own money to
+    user_owner = models.ForeignKey(User,default=1, null=True, on_delete=models.CASCADE, related_name='user_owner')
+    # collection of users from corresponding Group that now own money to owner.  Its separate entity since some users from Group may
+    # not take part in debt
+    debt_participants = models.ManyToManyField(User)
     # debts of each user 
-    debts_amounts = models.TextField()
+    debts_amounts = models.TextField() 
     def __str__(self):
         return self.debts_amounts
-    
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # fucntion to check if user owner is in debt_participants
+    def check_owner(self):
+        if self.user_owner in self.debt_participants.all():
+            return True
+        return False 
+    def delete_self(self):
+        # Perform any additional cleanup or operations before deletion
+        self.delete()
+    # fucntion to check if all debt_participants are from realted to this debt group
+    def check_participants(self): 
+        for i in self.debt_participants.all():
+            if i not in self.group_set.first().users.all():
+                return False
+        return True
        
-    def save(self, *args, **kwargs):
-        # Call the method to update user choices before saving
-        self._update_user_choices()
-        super().save(*args, **kwargs)
 
-    def _update_user_choices(self):
-        if self.id:  # Check if the instance has a related group       
-            # Get the users related to this Debt instance's group
-            users = self.group_set.first().users.all()      
-            # Construct choices based on the related users
-            self._meta.get_field('user_owner').choices = [(user.id, user.username) for user in users]
-            super().save()
-
-        else:
-            # If the instance doesn't have a related group, set choices to an empty list
-            self._meta.get_field('user_owner').choices = [] 
     
 # to migrate:
     # 1. add app to settings settings.py

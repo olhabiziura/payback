@@ -308,7 +308,7 @@ paths:
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
-  /gruops/{groupId}/debts/:
+  /groups/{groupId}/debts/:
     description: |
            endpoint of list of debts related to group with given groupId
     parameters: 
@@ -352,6 +352,85 @@ paths:
         # No 401
         # No 403
         # No 404
+        "500": { $ref: "#/components/responses/ServerError" }
+  /groups/{groupId}/debts/{debtId}:
+    description: |
+           endpoint of list of debts related to group with given groupId
+    parameters: 
+      - name:  groupId
+        in: path
+        required: true
+        schema: {$ref: "#/components/parameters/id" }
+      - name: debtId
+        in: path
+        required: true
+        schema: {$ref: "#/components/parameters/id" }
+    get:
+      tags: ["debt"]
+      summary: get a debt with given debtId
+      description: |
+          returns a debt with given debtId that belong to group with given groupId
+      operationId: getDebt
+      responses:
+        "200": { $ref: "#/components/schemas/debt" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        # No 403: User will not see banned users
+        # No 404: 404 would be 200 empty-userListResponse
+        "500": { $ref: "#/components/responses/ServerError" }
+    put: 
+      tags: ["group"]
+      summary: update a user's profile with new data 
+      description: |
+        changes group's details with a new given one.
+      operationId: updateDebt
+      requestBody:
+        required: true
+        content: 
+          application/json: 
+            schema: 
+             description: |
+                fields to update, here owner is user that paid for other users and now other users that are mentioned in users field owe money. Amounts is for now just a string that stores amount that each user owes money
+                  Each number corresponds to debt of user in users field with same position as in amounts.
+                 owner: ["Aang]
+                 users: ["Sam","Bob"]
+                 amounts: [1,2]
+                 
+                 sam owns Aang 1
+                 bob owns Aang 2
+                 
+             properties: 
+                owner: 
+                  $ref: "components/schemas/id"  
+                users: 
+                   $ref: "#/components/schemas/users"
+                amounts: 
+                  description: | 
+                      amounts that users owe to owner 
+                  type: string
+                  example: '[1,2,3]'
+      responses:
+        "200":
+          description: debt was found and details returned.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/user" }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+        "500": { $ref: "#/components/responses/ServerError" }
+    delete: 
+      tags: ["debt"]
+      summary: delete debt with given debtId 
+      operationId: deleteDebt
+      responses: 
+        "204":
+          description: debt was deleted
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/AuthorizationError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
         "500": { $ref: "#/components/responses/ServerError" }
 components:
   parameters:

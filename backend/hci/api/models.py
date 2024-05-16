@@ -62,7 +62,7 @@ class Debt(models.Model):
         return self.debts_amounts
     # fucntion to check if user owner is in debt_participants
     def check_owner(self):
-        if self.user_owner in self.debt_participants.all():
+        if self.user_owner in self.group_set.first().users.all():
             return True
         return False 
     def delete_self(self):

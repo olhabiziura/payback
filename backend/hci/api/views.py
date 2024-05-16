@@ -132,9 +132,12 @@ class DebtList(generics.GenericAPIView, mixins.ListModelMixin, mixins.CreateMode
             debt = serializer.save()
             group.debts.add(debt)  
             logger.debug("Debt added to group")
-            if debt.check_owner() == False or debt.check_participants() == False:
+            if debt.check_owner() == False:
                 debt.delete_self()
-                return Response({"message": "user owner or participants are not in the group"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"message": "user owner is not in the group"}, status=status.HTTP_400_BAD_REQUEST)
+            if debt.check_participants() == False:
+                debt.delete_self()
+                return Response({"message": "one of the participants is not in the group"}, status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # API endpoint for listing a list of all users || later will be added fucn for filtering the list and getting list of specific users

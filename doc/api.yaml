@@ -32,7 +32,7 @@ paths:
       tags: ["signup"]
       summary: Creates a new user with given credentails
       description: |
-        creates a new user based on given username that should be unique, password, email and optional profile picture
+        creates a new user based on given username that should be unique, password, email and optionaly profile picture
       security: []
       operationId: doSignup
       requestBody: 
@@ -45,16 +45,16 @@ paths:
                   creating new user requires username, password, email and optionally prof pic
               properties: 
                 username: { $ref: "#/components/schemas/username"}
-                password: { 
-                  $ref: "#/components/schemas/password"}
+                password: { $ref: "#/components/schemas/password"}
                 email: { $ref: "#/components/schemas/email"}
                 profilePicture: { $ref: "#/components/schemas/profilePicture" } 
       responses: 
         "201":
-          description: sing up succ, returns user identifier.
+          description: | 
+              sing up succ, returns user token with user profile.
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user" }
+              schema: { $ref: "#/components/responses/loginResponse" }
         # No 401
         # No 403
         # No 404
@@ -87,10 +87,10 @@ paths:
                 }
       responses:
         "200":
-          description: login succ, returns user identifier.
+          description: login succ, returns user token and user details
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/user" }
+              schema: { $ref: "#/components/responses/loginResponse" }
         "404": { $ref: "#/components/responses/NotFoundError" }
         # No 401
         # No 403
@@ -106,12 +106,12 @@ paths:
         checks authentity of a token that is sent in http Authorization header. If token is valid server sends back a 200 status response
       operationId: checkToken
       responses: 
-        "200": { $ref: "#/components/responses/userListResponse" }
+        "200": { $ref: "#/components/schemas/user" }
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "500": { $ref: "#/components/responses/ServerError" }
   
   /users/:
-    description: endpoint to get a list of users
+    description: endpoint for operations related to a list of users
     get:
       tags: ["user"]
       summary: Search users' collection
@@ -521,6 +521,18 @@ components:
             type: object
             properties:
               users: { $ref: "#/components/schemas/userList" }
+    loginResponse:
+      description: |
+        returns a user token and user profile. Used after succ login or singup
+      content: 
+        application/json:
+          schema: 
+            description: |
+              token and user details that will be sent to user after succ login or signup
+            type: object
+            properties:
+              token: { $ref: "#/components/schemas/token" }
+              user: { $ref: "#/components/schemas/user" } 
   schemas:
     groups: 
       description: a set of groups
@@ -660,9 +672,8 @@ components:
   securitySchemes:
     tokenAuthentication:
       description: |
-        User authentication with the user ID passed
+        User authentication with the token of user 
         as an authentication token.
-        Of course, that is extremely insecure, but it's done
-        according to the project specification.
+        
       type: http
-      scheme: bearer
+      scheme: token

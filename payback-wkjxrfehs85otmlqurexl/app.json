@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bdbde276-cb79-46c0-a4fa-7a38b3df3187"
+      }
+    },
+    "owner": "olhabiziura"
   }
 }

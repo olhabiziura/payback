@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import Index, RegisterView, protected_view, user_groups, create_group, delete_groups, update_profile, get_profile_data, get_group_details, update_group_members, create_expense, get_profile, get_expense_details, search_users, add_friend, get_friends_list
+from .views import Index, RegisterView, protected_view, user_groups, create_group, delete_groups, update_profile, get_profile_data, get_group_details, update_group_members, create_expense, get_profile, get_expense_details, search_users, add_friend, get_friends_list, get_overall_graph
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -22,7 +22,7 @@ urlpatterns = [
     path('api/expenses/<int:expense_id>/', get_expense_details, name='add-expense'),
     path('api/search-users/', search_users, name='search_users'),
     path('api/add-friend/', add_friend, name='add_friend'),
-    path('api/friends/', get_friends_list, name='get_friends_list')
-
+    path('api/friends/', get_friends_list, name='get_friends_list'),
+    path('api/graph-data/', get_overall_graph, name='get_graph')
 ]
 

@@ -80,3 +80,15 @@ class ExpenseDataSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+class CombinedResultSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    user_id = serializers.IntegerField()
+    amount = serializers.IntegerField()  # Assuming amount is an integer
+
+    def to_representation(self, instance):
+        return {
+            'name': instance[0],
+            'user_id': instance[1]['id'],
+            'amount': instance[1]['amount']
+        }

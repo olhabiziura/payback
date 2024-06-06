@@ -3,8 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
 
-  baseURL: //'http://192.168.1.235:8000'
-  'http://192.168.1.77:8000/',  // Replace with your local IP address
+  baseURL: 'http://172.20.10.4:8000'
+  //'http://192.168.1.235:8000'
+  //'http://192.168.1.77:8000/',
+    // Replace with your local IP address
 });
 
 api.interceptors.request.use(

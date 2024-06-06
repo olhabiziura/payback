@@ -1,7 +1,7 @@
 from django.shortcuts import HttpResponse
 from rest_framework import generics
 from django.contrib.auth.models import User
-from .serializers import RegisterSerializer, UserProfileSerializer, ExpenseSerializer, ExpenseDataSerializer, OwesSerializer
+from .serializers import RegisterSerializer, UserProfileSerializer, ExpenseSerializer, ExpenseDataSerializer, OwesSerializer, CombinedResultSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -452,3 +452,92 @@ def add_friend(request):
         return Response({'message': 'Friend added successfully'}, status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+def get_owed_to_user(request):
+    user_id = request.user.id
+    expenses = Expense.objects.filter(user_id=user_id)
+    expense_ids = expenses.values_list('id', flat=True)
+    owes = Owes.objects.filter(expense_id__in=expense_ids)
+    result = []
+
+    for owe in owes:
+        member = get_object_or_404(Membership, id=owe.member_id)
+        if member.user_id is None:
+            membership = get_object_or_404(Membership, id=member.id)
+            group = get_object_or_404(Group, id=membership.group_id)
+            member_name = f"{member.name} ({group.name})"
+            member_id = None
+        else:
+            member_name = member.name
+            member_id = member.user_id
+
+        result.append({
+            'name': member_name,
+            'id': member_id,
+            'amount': owe.amount
+        })
+
+    combined_result = {}
+    for record in result:
+        if record['id'] is not None:
+            if record['id'] in combined_result:
+                combined_result[record['id']]['amount'] += record['amount']
+            else:
+                combined_result[record['id']] = record
+        else:
+            combined_result[f"{record['name']}_group"] = record
+
+    final_result = list(combined_result.values())
+    print(final_result)
+    return final_result
+
+def get_user_ows(request):
+    owes_records = Owes.objects.filter(user_id=request.user.id)
+    result = []
+
+    for owe in owes_records:
+        expense = get_object_or_404(Expense, id=owe.expense_id)
+        owed_to_user = get_object_or_404(User, id=expense.user_id)
+
+        result.append({
+            'name': owed_to_user.username,
+            'id': owed_to_user.id,
+            'amount': owe.amount
+        })
+
+    combined_result = {}
+    for record in result:
+        if record['id'] in combined_result:
+            combined_result[record['id']]['amount'] += record['amount']
+        else:
+            combined_result[record['id']] = record
+
+    final_result = list(combined_result.values())
+    print ( final_result)
+    return final_result
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_overall_graph(request):
+    owed_to_user = get_owed_to_user(request)
+    user_ows = get_user_ows(request)
+
+    for record in owed_to_user:
+        record['amount'] = abs(record['amount'])
+
+    for record in user_ows:
+        record['amount'] = -abs(record['amount'])
+    print(user_ows)
+    combined_result = {}
+    for record in owed_to_user + user_ows:
+        key = record['name']
+        if key in combined_result:
+            combined_result[key]['amount'] += record['amount']
+        else:
+            combined_result[key] = record
+    
+    serialized_result = CombinedResultSerializer(combined_result.items(), many=True).data
+    return JsonResponse(serialized_result, safe=False)

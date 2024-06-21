@@ -1,10 +1,8 @@
 import React from 'react';
-import { Text, StyleSheet, View } from 'react-native';
+import { Text, StyleSheet, View, Image, TouchableOpacity } from 'react-native';
 import HeaderBar from '../components/HeaderBar';
 import styles from '../assets/styles/MainContainer';
 import { Button } from 'react-native-paper';
-import { TouchableOpacity } from 'react-native';
-
 
 const HomeScreen = ({ navigation }) => (
   <View style={stylesb.container}>
@@ -18,19 +16,29 @@ const HomeScreen = ({ navigation }) => (
       question={true}
     />
     <View style={stylesb.container_main}>
-      <Text style={stylesb.text}>Home</Text>
+      <View style={stylesb.welcomeContainer}>
+        <Image source={require('../assets/images/welcome_mascot_transparent.png')} style={stylesb.imageMedium} />
+        <Text style={stylesb.text}>Welcome!</Text>
+      </View>
       <CustomButton
-        title="Go to Bar Screen"
+        title="See the graph summary"
         onPress={() => navigation.navigate('BarGraph')}
-        titleColor="white" 
-        backgroundColor= "black"
+        titleColor="white"
+        backgroundColor="grey"
         style={stylesb.customButton}
       />
       <CustomButton
-        title="Go to Groups Screen"
+        title="See the list of my groups"
         onPress={() => navigation.navigate('Groups')}
-        titleColor="white" 
-        backgroundColor= "black"
+        titleColor="white"
+        backgroundColor="grey"
+        style={stylesb.customButton}
+      />
+      <CustomButton
+        title="Go to Payment Page"
+        onPress={() => navigation.navigate('Payment Page')}
+        titleColor="white"
+        backgroundColor="grey"
         style={stylesb.customButton}
       />
     </View>
@@ -39,7 +47,7 @@ const HomeScreen = ({ navigation }) => (
 
 const CustomButton = ({ title, onPress, titleColor, style, backgroundColor }) => {
   return (
-    <TouchableOpacity onPress={onPress} style={[stylesb.button,{ backgroundColor }, style]}>
+    <TouchableOpacity onPress={onPress} style={[stylesb.button, { backgroundColor }, style]}>
       <Text style={[stylesb.buttonText, { color: titleColor }]}>{title}</Text>
     </TouchableOpacity>
   );
@@ -57,18 +65,31 @@ const stylesb = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   text: {
     fontSize: 24,
-    justifyContent: 'center',
-    alignContent: 'space-evenly',
+    textAlign: 'center',
     marginBottom: 20,
-    padding : '20',
   },
   customButton: {
-    paddingVertical: 20, // Increased padding
-    paddingHorizontal: 100, // Increased padding
-    borderRadius: 100,
+    width: '95%',
+    paddingVertical: 20,
+    paddingHorizontal: 100,
+    borderRadius: 30,
     elevation: 10,
+    marginVertical: 5, // Add margin between buttons
+  },
+  imageMedium: {
+    width: 250,
+    height: 250,
+    marginBottom: 20,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

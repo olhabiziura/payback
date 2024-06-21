@@ -6,6 +6,9 @@ import HeaderBar from '../components/HeaderBar';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../api';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Platform, StatusBar } from "react-native";
+
 
 const GroupExpensesScreen = ({ navigation }) => {
   const [groups, setGroups] = useState([]);
@@ -69,8 +72,8 @@ const GroupExpensesScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <HeaderBar
+    <SafeAreaView style = {styles.safeArea}>
+       <HeaderBar
         style={styles.header_container}
         navigation={navigation}
         goBack={true}
@@ -79,6 +82,8 @@ const GroupExpensesScreen = ({ navigation }) => {
         bars={true}
         question={true}
       />
+    <View style={styles.container}>
+     
       <View style={styles.editContainer}>
         <TouchableOpacity onPress={handleEditPress} style={styles.editButton}>
           <Text style={styles.editButtonText}>{editMode ? 'Done' : 'Edit'}</Text>
@@ -116,14 +121,20 @@ const GroupExpensesScreen = ({ navigation }) => {
       </View>
       
     </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+  },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#F4F4F4',
   },
   container_main: {
     flex: 1,
@@ -180,6 +191,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     backgroundColor: 'red',
     borderRadius: 5,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
 });
 

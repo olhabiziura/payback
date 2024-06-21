@@ -1,12 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'; // Import the tick icon
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Platform, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import api from '../api';
+import HeaderBar from '../components/HeaderBar';
 
-const AddFriendPage = () => {
+const AddFriendPage = ({ navigation, route }) => {
+  const { userId } = route.params; // Extracting userId from route params
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [addedFriends, setAddedFriends] = useState([]);
+  const [friends, setFriends] = useState([]);
+
+  useEffect(() => {
+    if (userId) {
+      fetchFriends(userId);
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -16,41 +25,51 @@ const AddFriendPage = () => {
     }
   }, [searchQuery]);
 
+  const fetchFriends = async (userId) => {
+    try {
+      const response = await api.get(`/api/user-profile/${userId}/`);
+      const profileData = response.data;
+      setFriends(profileData.friends);
+      console.log('Fetched friends:', profileData.friends);
+    } catch (error) {
+      console.error('Error fetching profile data:', error);
+    }
+  };
+
   const searchUsers = async () => {
     try {
       const response = await api.get(`/api/search-users/?query=${searchQuery}`);
-      const data = response.data.slice(0, 5); // Only get the first 5 results
+      const data = response.data.slice(0, 5);
       setSearchResults(data);
+      console.log('Search results:', data);
     } catch (error) {
       console.error('Error searching users:', error);
     }
   };
 
+  const isFriend = (userId) => {
+    return friends.some(friend => friend.id === userId);
+  };
+
   const renderUserItem = ({ item }) => (
     <View style={styles.userItem}>
       <Text>{item.username}</Text>
-      {addedFriends.includes(item.id) ? (
-        <MaterialIcons name="done" size={24} color="green" />
+      {isFriend(item.id) ? (
+        <Ionicons name="checkmark" size={24} color="green" />
       ) : (
         <Button title="Add" onPress={() => handleAddFriend(item.id)} />
       )}
     </View>
   );
 
-  const handleAddFriend = async (userId) => {
+  const handleAddFriend = async (friendId) => {
     try {
-      // Make an API call to add the user as a friend
-      const response = await api.post('/api/add-friend/', {
-        friendId: userId, // ID of the user you want to add as a friend
-      });
-  
+      const response = await api.post('/api/add-friend/', { friendId });
+
       if (response.status === 200) {
-        // Friend added successfully
         console.log('Friend added successfully');
-        // Update the addedFriends state to include the newly added friend
-        setAddedFriends([...addedFriends, userId]);
+        fetchFriends(userId); // Refresh friends list after adding a new friend
       } else {
-        // Handle error
         console.error('Failed to add friend');
       }
     } catch (error) {
@@ -59,19 +78,30 @@ const AddFriendPage = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Search by username"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
+    <SafeAreaView style={styles.safeArea}>
+      <HeaderBar
+        style={styles.header_container}
+        navigation={navigation}
+        goBack={true}
+        person={true}
+        home={true}
+        bars={true}
+        question={true}
       />
-      <FlatList
-        data={searchResults}
-        renderItem={renderUserItem}
-        keyExtractor={(item) => item.id}
-      />
-    </View>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder="Search by username"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <FlatList
+          data={searchResults}
+          renderItem={renderUserItem}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -92,6 +122,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS === "IOS" ? StatusBar.currentHeight : -50,
   },
 });
 

@@ -1,7 +1,7 @@
 from django.shortcuts import HttpResponse
 from rest_framework import generics
 from django.contrib.auth.models import User
-from .serializers import RegisterSerializer, UserProfileSerializer, ExpenseSerializer, ExpenseDataSerializer, OwesSerializer, CombinedResultSerializer
+from .serializers import RegisterSerializer, UserProfileSerializer, ExpenseSerializer, ExpenseDataSerializer, OwesSerializer, CombinedResultSerializer, CombinedResultSerializer2
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -20,7 +20,13 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.exceptions import ObjectDoesNotExist
 
+from django.conf import settings
+from django.views.decorators.http import require_POST
+import stripe
+
+
 from decimal import Decimal
+
 # Create your views here.
 def Index(request):
     return HttpResponse("It's working")
@@ -179,7 +185,8 @@ from django.db.models import Q
 def get_profile_data(request, user_id):
     try:
         # Fetch user profile data
-        
+        user = request.user
+      
         user_profile = User.objects.get(id=user_id)
         profile = UserProfile.objects.get(user=user_profile)
         serializer = UserProfileSerializer(profile)
@@ -377,6 +384,8 @@ def get_expense_details(request, expense_id):
         
         # Add 'paidBy' field to expense_data
         expense_data['paidBy'] = payer.username
+        if payer.username == request.user.username:
+            expense_data['paidBy'] = 'me'
 
         # Fetch the Owes data for the expense
         owes = Owes.objects.filter(expense=expense)
@@ -384,21 +393,29 @@ def get_expense_details(request, expense_id):
         for owe in owes:
             member = owe.member
             membership = Membership.objects.filter(id=owe.member_id).first()
-            
-            if membership and membership.user_id:
-                owes_data.append({
-                    'name': member.name,
-                    'amount': owe.amount,
-                    'user_id': membership.user_id,
-                    'registered': True if membership.name else False
-                })
+            if member.name == request.user.username and payer.username == request.user.username:
+                pass
             else:
-                owes_data.append({
-                    'name': member.name,
-                    'amount': owe.amount,
-                    'user_id': None,
-                    'registered': False
-                })
+                if member.name == request.user.username:
+                    member_name = 'me'
+                else:
+                    member_name = member.name
+                
+                if membership and membership.user_id:
+                    owes_data.append({
+                        'name': member_name,
+                        'amount': owe.amount,
+                        'user_id': membership.user_id,
+                        'registered': True if membership.name else False
+                    })
+
+                else:
+                    owes_data.append({
+                        'name': member.name,
+                        'amount': owe.amount,
+                        'user_id': None,
+                        'registered': False
+                    })
         expense_data['owes'] = owes_data
         print(owes_data)
         # Create an instance of ExpenseDataSerializer with the updated expense_data
@@ -475,7 +492,7 @@ def get_owed_to_user(request):
         result.append({
             'name': member_name,
             'id': member_id,
-            'amount': owe.amount
+            'amount': owe.amount,
         })
 
     combined_result = {}
@@ -503,7 +520,8 @@ def get_user_ows(request):
         result.append({
             'name': owed_to_user.username,
             'id': owed_to_user.id,
-            'amount': owe.amount
+            'amount': owe.amount,
+            'date_of_registration': expense.date_of_registration
         })
 
     combined_result = {}
@@ -530,9 +548,29 @@ def get_overall_graph(request):
 
     for record in user_ows:
         record['amount'] = -abs(record['amount'])
-    print(user_ows)
+        if 'date_of_registration' in record:
+            record.pop('date_of_registration')
+
     combined_result = {}
     for record in owed_to_user + user_ows:
+        key = record['name']
+        if key in combined_result:
+            combined_result[key]['amount'] += record['amount']
+        else:
+            combined_result[key] = record
+    print(combined_result)
+    serialized_result = CombinedResultSerializer2(combined_result.items(), many=True).data
+    return JsonResponse(serialized_result, safe=False)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+@csrf_exempt
+def get_user_ows_serialised(request):
+    user_ows = get_user_ows(request)
+
+    combined_result = {}
+    for record in user_ows:
         key = record['name']
         if key in combined_result:
             combined_result[key]['amount'] += record['amount']
@@ -541,3 +579,104 @@ def get_overall_graph(request):
     
     serialized_result = CombinedResultSerializer(combined_result.items(), many=True).data
     return JsonResponse(serialized_result, safe=False)
+
+
+
+
+
+
+
+####################################################################################################
+
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@csrf_exempt
+@require_POST
+@api_view(['POST'])
+def process_payment_and_payout(request):
+    try:
+        data = json.loads(request.body)
+        
+        amount = data.get('amount')
+        currency = data.get('currency', 'eur')
+        recipient_iban = data.get('iban')
+        recipient_name = data.get('name')
+        card_details = data.get('cardDetails')  # card details from the frontend
+
+        amount_in_cents = int(float(amount) * 100)  # Convert to integer
+
+        # Validate minimum amount (€0.50 EUR)
+        if amount_in_cents < 50:
+            return JsonResponse({'error': 'Amount must be at least €0.50 EUR.'}, status=400)
+
+        # Step 1: Create a payment method
+        try:
+            payment_method = stripe.PaymentMethod.create(
+                type='card',
+                card={
+                    'number': card_details['number'],
+                    'exp_month': card_details['exp_month'],
+                    'exp_year': card_details['exp_year'],
+                    'cvc': card_details['cvc'],
+                },
+            )
+        except stripe.error.CardError as e:
+            return JsonResponse({'error': e.user_message}, status=400)
+        except stripe.error.RateLimitError as e:
+            return JsonResponse({'error': 'Rate limit error'}, status=500)
+        except stripe.error.InvalidRequestError as e:
+            return JsonResponse({'error': 'Invalid parameters'}, status=400)
+        except stripe.error.AuthenticationError as e:
+            return JsonResponse({'error': 'Authentication error'}, status=403)
+        except stripe.error.APIConnectionError as e:
+            return JsonResponse({'error': 'Network error'}, status=500)
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': str(e)+'szfd'}, status=500)
+
+        # Step 2: Create and confirm the payment intent
+        try:
+            payment_intent = stripe.PaymentIntent.create(
+                amount=amount_in_cents,
+                currency=currency,
+                payment_method_types=['card'],
+                confirm=True,
+                payment_method=payment_method.id,
+            )
+        except stripe.error.CardError as e:
+            return JsonResponse({'error': e.user_message}, status=400)
+        except stripe.error.RateLimitError as e:
+            return JsonResponse({'error': 'Rate limit error'}, status=500)
+        except stripe.error.InvalidRequestError as e:
+            return JsonResponse({'error': 'Invalid parameters'}, status=400)
+        except stripe.error.AuthenticationError as e:
+            return JsonResponse({'error': 'Authentication error'}, status=403)
+        except stripe.error.APIConnectionError as e:
+            return JsonResponse({'error': 'Network error'}, status=500)
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': str(e)+'dsjg'}, status=500)
+
+        if payment_intent['status'] != 'succeeded':
+            return JsonResponse({'error': 'Payment failed.'}, status=400)
+
+        # Step 3: Create a payout to the recipient's bank account
+        try:
+            payout = stripe.Payout.create(
+                amount=amount_in_cents - int(amount_in_cents * 0.028 + 30),  # Subtracting Stripe fees (2.9% + 0.30 EUR)
+                currency=currency,
+                destination=recipient_iban,
+                description=f"Payout to {recipient_name}",
+            )
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': 'Payout creation failed: ' + str(e)}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+        return JsonResponse({'status': 'success', 'payout_id': payout.id})
+    except Exception as e:
+        print(e)
+        return JsonResponse({'error': str(e)}, status=500)

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Button, FlatList } from 'react-native';
 import api from '../api'; // Import your API module
-
+import { Platform, StatusBar } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+import HeaderBar from '../components/HeaderBar';
 const MembersPage = ({ route, navigation }) => {
   const { groupId } = route.params;  
   const [groupData, setGroupData] = useState(null);
@@ -60,6 +62,9 @@ const MembersPage = ({ route, navigation }) => {
   };
 
   return (
+    <SafeAreaView style = {styles.safeArea}>
+    <HeaderBar style = {styles.header_container} navigation={navigation} goBack = {true} person = {true} home = {true} bars ={true} question = {true}/>
+
     <View style={styles.container}>
       {groupData ? (
         <>
@@ -97,6 +102,7 @@ const MembersPage = ({ route, navigation }) => {
         <Text>Loading...</Text>
       )}
     </View>
+    </SafeAreaView>
   );
 };
 
@@ -159,6 +165,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     backgroundColor: '#ffffff',
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
 });
 

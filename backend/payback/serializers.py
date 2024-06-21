@@ -84,11 +84,27 @@ class ExpenseDataSerializer(serializers.Serializer):
 class CombinedResultSerializer(serializers.Serializer):
     name = serializers.CharField()
     user_id = serializers.IntegerField()
-    amount = serializers.IntegerField()  # Assuming amount is an integer
+    amount = serializers.IntegerField()
+    date_of_registration = serializers.DateTimeField()  # Assuming date_of_registration is a DateTimeField
 
     def to_representation(self, instance):
         return {
             'name': instance[0],
             'user_id': instance[1]['id'],
-            'amount': instance[1]['amount']
+            'amount': instance[1]['amount'],
+            'date_of_registration': instance[1]['date_of_registration']  # Include date_of_registration field
+        }
+    
+
+class CombinedResultSerializer2(serializers.Serializer):
+    name = serializers.CharField()
+    user_id = serializers.IntegerField()
+    amount = serializers.IntegerField()
+    
+
+    def to_representation(self, instance):
+        return {
+            'name': instance[0],
+            'user_id': instance[1]['id'],
+            'amount': instance[1]['amount'],
         }

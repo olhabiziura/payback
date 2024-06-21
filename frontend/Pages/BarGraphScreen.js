@@ -1,126 +1,157 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { BarChart, Grid } from 'react-native-svg-charts';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
-import { Text as SvgText } from 'react-native-svg';
-import BarGraph from '../src/functions/barGraph';
-import styles from '../assets/styles/MainContainer';
+import api from '../api';
+import { Platform, StatusBar } from "react-native";
+
+
+const screenHeight = Dimensions.get('window').height;
+const maxBarHeight = screenHeight / 3;
 
 const BarGraphScreen = ({ navigation }) => {
+  const [data, setData] = useState([]);
+  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get('window').height;
+  const barWidth = 40; // Adjust the width of each bar as needed
+  const maxBarHeight = screenHeight / 3; // Max height of bars
 
-  const data = BarGraph();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await api.get('/api/graph-data/');
+        const fetchedData = response.data;
 
-  const barData = data.map(item => ({
-    value: item.value,
-    svg: {
-      fill: item.value > 0 ? '#629BB6' : '#DF8F48',
-    },
-    key: `bar-${item.name}`,
-    name: item.name,
-  }));
+        // Transform the fetched data into the desired format
+        const transformedData = fetchedData.map(item => ({
+          label: item.name, // Change 'name' to 'label' for better understanding
+          value: parseFloat(item.amount), // Ensure value is a number
+        }));
 
-  const CustomLabels = ({ x, y, bandwidth, data }) => (
-    data.map((item, index) => (
-      <SvgText
-        key={index}
-        x={x(index) + (bandwidth / 2)}
-        y={item.value > 0 ? y(item.value) - 10 : y(item.value) + 20}
-        fontSize={14}
-        fill="black"
-        alignmentBaseline="mathematical"
-        textAnchor="middle"
-      >
-        {item.name}
-      </SvgText>
-    ))
-  );
+        setData(transformedData);
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
 
-  const CustomValueLabels = ({ x, y, bandwidth, data }) => (
-    data.map((item, index) => (
-      <SvgText
-        key={index}
-        x={x(index) + (bandwidth / 2)}
-        y={item.value > 0 ? y(item.value) - 25 : y(item.value) + 5}
-        fontSize={14}
-        fill="black"
-        alignmentBaseline="mathematical"
-        textAnchor="middle"
-      >
-        {item.value}
-      </SvgText>
-    ))
-  );
+    fetchData();
+  }, []);
 
+
+  
+  if (data.length === 0) {
+    return <Text>Loading...</Text>;
+  }
+
+  // Find the maximum absolute value to scale the bars
+  const maxValue = Math.max(...data.map(item => Math.abs(item.value)));
   return (
-    <View style={stylesa.safeArea}>
-      <HeaderBar 
-        style={stylesa.header_container}
-        navigation={navigation} 
-        goBack={true} 
-        person={true} 
-        home={true} 
-        bars={true} 
-        question={true} 
-      />
-      <Text style={stylesa.title}>Debt Overview</Text>
-      <ScrollView contentContainerStyle={stylesa.scrollViewContent}>
-        <View style={stylesa.container_main}>
-          <ScrollView horizontal style={stylesa.horizontalScrollView}>
-            <BarChart
-              style={stylesa.barChart}
-              data={barData}
-              yAccessor={({ item }) => item.value}
-              contentInset={{ top: 30, bottom: 30 }}
-              spacingInner={0.2}
-            >
-              <Grid direction={Grid.Direction.VERTICAL} />
-              <CustomLabels x={(d) => d} y={(d) => d} bandwidth={(d) => d} data={barData} />
-              <CustomValueLabels x={(d) => d} y={(d) => d} bandwidth={(d) => d} data={barData} />
-            </BarChart>
+    <SafeAreaView style={styles.safeArea}>
+      <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.containerMain}>
+          <Text style={styles.title}>Bar Graph</Text>
+          <ScrollView horizontal>
+            <View style={styles.graphContainer}>
+              {/* Draw zero line */}
+              <View style={styles.zeroLine} />
+              {data
+                .filter(item => item.value !== 0) // Filter out items with value 0
+                .map((item, index) => {
+                  const barHeight = (Math.abs(item.value) / maxValue) * maxBarHeight;
+                  return (
+                    <View key={index} style={styles.barContainer}>
+                      <Text style={[styles.value, item.value >= 0 ? styles.positiveValue : styles.negativeValue]}>
+                        {item.value}
+                      </Text>
+                      <View
+                        style={[
+                          styles.bar,
+                          {
+                            backgroundColor: item.value >= 0 ? 'blue' : 'red',
+                            height: barHeight,
+                            marginTop: item.value >= 0 ? maxBarHeight - barHeight : maxBarHeight,
+                            marginBottom: item.value < 0 ? maxBarHeight - barHeight : maxBarHeight,
+                          },
+                        ]}
+                      />
+                      <Text style={[styles.label, item.value >= 0 ? styles.positiveLabel : styles.negativeLabel]}>
+                        {item.label}
+                      </Text>
+                    </View>
+                  );
+                })}
+            </View>
           </ScrollView>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
-const stylesa = StyleSheet.create({
+const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
   scrollViewContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom : 100,
+    paddingBottom: 100,
   },
-  container_main: {
+  containerMain: {
     width: '100%',
     alignItems: 'center',
+    paddingHorizontal: 10,
   },
   title: {
+    marginBottom: 40,
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 10,
-    paddingLeft: '29%',
+    
   },
-  horizontalScrollView: {
-    width: '100%',
+  graphContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'relative',
   },
-  container_chart: {
-    height: 200,
-    marginVertical: 10,
+  barContainer: {
+    marginRight: 5,
+    alignItems: 'center',
+    marginBottom: 65,
   },
-  barChart: {
-    height: 500,
-    width: 700,
-    padding: 10, // Adjust this width as necessary to fit your data
+  bar: {
+    width: 70,
   },
-  contentInset: {
-    top: 20,
-    bottom: 20,
+  label: {
+    textAlign: 'center',
+  },
+  positiveLabel: {
+    marginTop: 5,
+  },
+  negativeLabel: {
+    marginBottom: 5,
+  },
+  value: {
+    textAlign: 'center',
+  },
+  positiveValue: {
+    marginBottom: 5,
+  },
+  negativeValue: {
+    marginTop: 5,
+  },
+  zeroLine: {
+    position: 'absolute',
+    top: maxBarHeight + 21,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'black',
   },
 });
 

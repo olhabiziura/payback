@@ -47,6 +47,12 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question }) => {
           />
         )}
         <View style={styles.rightActions}>
+        {question && (
+            <Appbar.Action
+              icon={() => <Icon2 name="question" size={24} />}
+              onPress={() => navigation.navigate('About')}
+            />
+          )}
           {home && (
             <Appbar.Action
               icon={() => <Icon1 name="home" size={24} />}
@@ -59,12 +65,7 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question }) => {
               onPress={toggleMenu}
             />
           )}
-          {question && (
-            <Appbar.Action
-              icon={() => <Icon2 name="question" size={24} />}
-              onPress={() => navigation.navigate('About')}
-            />
-          )}
+          
         </View>
       </Appbar.Header>
       {isMenuVisible && <SlidingMenu isVisible={isMenuVisible} onClose={toggleMenu} navigation={navigation} />}

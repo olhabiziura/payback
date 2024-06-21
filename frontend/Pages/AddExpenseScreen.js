@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Button, Platform } from 'react-native';
 import api from '../api'; // Import your API module
+import { SafeAreaView } from 'react-native-safe-area-context';
+import HeaderBar from '../components/HeaderBar';
 
 const AddExpensePage = ({ route, navigation }) => {
   const { groupId, setExpenses } = route.params;
@@ -75,8 +77,11 @@ const AddExpensePage = ({ route, navigation }) => {
   };
 
   return (
+    <SafeAreaView style= {styles.safeArea}>
+    <HeaderBar style = {styles.header_container} navigation={navigation} goBack = {true} person = {true} home = {true} bars ={true} question = {true}/>
+
     <View style={styles.container}>
-      <Text style={styles.title}>Add New Expense</Text>
+      <Text style={styles.title}>New Expense</Text>
       <TextInput
         style={styles.input}
         placeholder="Name of Expense"
@@ -118,6 +123,7 @@ const AddExpensePage = ({ route, navigation }) => {
         <Text style={styles.addButtonText}>Add Expense</Text>
       </TouchableOpacity>
     </View>
+    </SafeAreaView>
   );
 };
 
@@ -126,12 +132,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 40,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#F4F4F4',
   },
   title: {
-    fontSize: 26,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 40,
+    marginTop: -20,
     color: '#343a40',
     textAlign: 'center',
   },
@@ -141,14 +148,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     backgroundColor: '#ffffff',
   },
   subTitleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    margin: 20,
   },
   subTitle: {
     fontSize: 20,
@@ -161,14 +168,16 @@ const styles = StyleSheet.create({
   },
   memberContainer: {
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 15,
     marginBottom: 5,
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#ced4da',
+    alignItems: 'center'
   },
   selectedMemberContainer: {
-    backgroundColor: '#7fbfff',
+    backgroundColor: 'grey',
+   
   },
   memberText: {
     fontSize: 16,
@@ -179,9 +188,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: 'grey',
     padding: 25,
-    borderRadius: 5,
+    borderRadius: 15,
     alignItems: 'center',
     marginBottom: 30,
   },
@@ -189,6 +198,11 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
 });
 

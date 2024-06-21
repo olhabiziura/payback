@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
 import api from '../api';
-
+import { Platform, StatusBar } from "react-native";
 const AddGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -160,6 +160,11 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: 'white',
     fontSize: 18,
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
 });
 

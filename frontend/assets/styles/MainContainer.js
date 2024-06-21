@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { Platform, StatusBar } from "react-native";
 
 const styles = StyleSheet.create({
     container :{
@@ -51,13 +52,13 @@ const styles = StyleSheet.create({
       imageMedium: {
         width : 200,
         height : 200,
-        alignItems : 'center',
+        alignItems : 'right',
         marginVertical : 20,
         paddingTop : 120,
         paddingBottom: 100,
         borderRadius: 25, // Set the border radius to half of width and height to make it round
         borderWidth: 3,
-        borderColor: '#182E43',
+        borderColor: 'white',
       },
       content: {
         flex: 1,
@@ -181,6 +182,11 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       borderColor: '#ccc',
       backgroundColor: '#f9f9f9',
+    },
+    safeArea: {
+      flex: 1,
+      backgroundColor: '#F4F4F4',
+      paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
     },
 
   });

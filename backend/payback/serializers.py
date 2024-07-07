@@ -22,37 +22,32 @@ from .models import UserProfile, Friends
 from django.db.models import Q
 
 
+class UserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(allow_null=True, required=False)
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source='user.first_name', required=False)
-    surname = serializers.CharField(source='user.last_name', required=False)
-    email = serializers.EmailField(source='user.email', required=False)
-    friends = serializers.SerializerMethodField()
+    user = UserSerializer()
 
     class Meta:
         model = UserProfile
-        fields = ['profile_picture', 'iban', 'name', 'surname', 'email', 'friends']
-
-    def get_friends(self, obj):
-        # Get friends of the user
-        friends = Friends.objects.filter(Q(user1=obj.user) | Q(user2=obj.user))
-        # Serialize friends data
-        friend_data = [{'id': friend.id, 'username': friend.user1.username if friend.user2 == obj.user else friend.user2.username} for friend in friends]
-        return friend_data
+        fields = ['user', 'iban', 'profile_picture']
 
     def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', {})
+        user_data = validated_data.pop('user', None)
         user = instance.user
 
-        user.first_name = user_data.get('first_name', user.first_name)
-        user.last_name = user_data.get('last_name', user.last_name)
-        user.email = user_data.get('email', user.email)
-        user.save()
+        if user_data:
+            user.first_name = user_data.get('first_name', user.first_name)
+            user.last_name = user_data.get('last_name', user.last_name)
+            user_email = user_data.get('email', user.email)
+            if user_email is not None:
+                user.email = user_email
+            user.save()
 
-        instance.profile_picture = validated_data.get('profile_picture', instance.profile_picture)
-        instance.iban = validated_data.get('iban', instance.iban)
-        instance.save()
-
-        return instance
+        return super(UserProfileSerializer, self).update(instance, validated_data)
 
 
 from .models import Expense, Owes

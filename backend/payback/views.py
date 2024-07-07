@@ -132,7 +132,8 @@ def get_profile(request):
             'id': user.id,
             'username': user.username,
             'email': user.email,
-            # Add any other user fields you want to include
+            'name' : user.first_name,
+            'surname': user.last_name
         }
         return JsonResponse(user_data, status=200)
     except Exception as e:
@@ -147,7 +148,7 @@ def update_profile(request):
         user_profile = UserProfile.objects.get(user=request.user)
     except UserProfile.DoesNotExist:
         user_profile = UserProfile(user=request.user)
-
+    
     # Handle the incoming data properly
     data = {
         'iban': request.data.get('iban'),
@@ -157,7 +158,8 @@ def update_profile(request):
             'email': request.data.get('email'),
         }
     }
-
+    
+    print(data)
     # If a profile picture is uploaded, add it to the data
     if 'profile_picture' in request.FILES:
         data['profile_picture'] = request.FILES['profile_picture']
@@ -185,20 +187,18 @@ from django.db.models import Q
 def get_profile_data(request, user_id):
     try:
         # Fetch user profile data
-        user = request.user
-      
         user_profile = User.objects.get(id=user_id)
         profile = UserProfile.objects.get(user=user_profile)
+    
         serializer = UserProfileSerializer(profile)
         response_data = serializer.data
- 
+
         # Add profile picture URL to the response
         response_data['profile_picture'] = request.build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None
 
         # Fetch list of friends (id and username)
         friends = Friends.objects.filter(Q(user1=user_profile) | Q(user2=user_profile)).values('user1', 'user2')
         friend_ids = set()
-        friend_list = []
 
         # Extract friend ids and remove the current user's id
         for friend in friends:
@@ -209,13 +209,14 @@ def get_profile_data(request, user_id):
 
         # Fetch usernames of friends
         friends_queryset = User.objects.filter(id__in=friend_ids)
-        for friend in friends_queryset:
-            friend_list.append({'id': friend.id, 'name': friend.username})
+        friend_list = [{'id': friend.id, 'name': friend.username} for friend in friends_queryset]
 
         response_data['friends'] = friend_list
 
         return Response(response_data, status=200)
-    except (User.DoesNotExist, UserProfile.DoesNotExist):
+    except User.DoesNotExist:
+        return Response({'error': 'User does not exist'}, status=404)
+    except UserProfile.DoesNotExist:
         return Response({'error': 'User profile does not exist'}, status=404)
 
 @api_view(['GET'])
@@ -281,7 +282,6 @@ def get_group_details(request, group_id):
 @permission_classes([IsAuthenticated])
 def update_group_members(request, group_id):
     try:
-        
         group = Group.objects.get(id=group_id)
         new_members = request.data.get('members', [])
 
@@ -290,12 +290,21 @@ def update_group_members(request, group_id):
         current_members = {m.user.id: m for m in current_memberships if m.user}
         current_names = {m.name: m for m in current_memberships if m.name}
 
-        # Remove members not in the new list
+        # Get all expenses related to the group
+        related_expenses = Expense.objects.filter(group=group)
+        
+        # Get all member_ids who owe for expenses related to the group
+        related_owes = Owes.objects.filter(expense_id__in=related_expenses)
+        members_with_owes = set(related_owes.values_list('member_id', flat=True))
+        print(members_with_owes)
+        # Remove members not in the new list and ensure they do not owe any expenses
         for member in current_memberships:
-            if member.user and str(member.user.id) not in new_members:
-                member.delete()
-            if member.name and member.name not in new_members:
-                member.delete()
+            print(member.id)
+            if member.user and str(member.user.id) not in new_members and member.user != request.user:
+                if member.id not in members_with_owes:
+                    
+                    member.delete()
+            
 
         # Add new members
         for member in new_members:
@@ -312,9 +321,6 @@ def update_group_members(request, group_id):
         return Response({'error': 'Group not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)
-
-
-
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -470,10 +476,20 @@ def add_friend(request):
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
 def get_owed_to_user(request):
     user_id = request.user.id
-    expenses = Expense.objects.filter(user_id=user_id)
+    filter_param = request.query_params.get('filter')
+
+    if filter_param == "all":
+        expenses = Expense.objects.filter(user_id=user_id)
+    elif filter_param == "&groupId":
+        print("i enter here " , request.query_params)
+        group_id = request.query_params.get('groupId')
+        print(group_id)
+        expenses = Expense.objects.filter(user_id=user_id, group_id=group_id)
+    else:
+        return JsonResponse({'error': 'Invalid filter parameter'}, status=status.HTTP_400_BAD_REQUEST)
+
     expense_ids = expenses.values_list('id', flat=True)
     owes = Owes.objects.filter(expense_id__in=expense_ids)
     result = []
@@ -497,20 +513,28 @@ def get_owed_to_user(request):
 
     combined_result = {}
     for record in result:
-        if record['id'] is not None:
-            if record['id'] in combined_result:
-                combined_result[record['id']]['amount'] += record['amount']
-            else:
-                combined_result[record['id']] = record
+        key = record['id'] if record['id'] is not None else f"{record['name']}_group"
+        if key in combined_result:
+            combined_result[key]['amount'] += record['amount']
         else:
-            combined_result[f"{record['name']}_group"] = record
+            combined_result[key] = record
 
     final_result = list(combined_result.values())
-    print(final_result)
     return final_result
 
+
 def get_user_ows(request):
-    owes_records = Owes.objects.filter(user_id=request.user.id)
+    filter_param = request.query_params.get('filter')
+
+    if filter_param == "all":
+        owes_records = Owes.objects.filter(user_id=request.user.id)
+    elif filter_param == "&groupId":
+        group_id = request.query_params.get('groupId')
+        membership_ids = Membership.objects.filter(group_id=group_id).values_list('id', flat=True)
+        owes_records = Owes.objects.filter(user_id=request.user.id, member_id__in=membership_ids)
+    else:
+        return JsonResponse({'error': 'Invalid filter parameter'}, status=status.HTTP_400_BAD_REQUEST)
+
     result = []
 
     for owe in owes_records:
@@ -521,7 +545,6 @@ def get_user_ows(request):
             'name': owed_to_user.username,
             'id': owed_to_user.id,
             'amount': owe.amount,
-            'date_of_registration': expense.date_of_registration
         })
 
     combined_result = {}
@@ -532,8 +555,8 @@ def get_user_ows(request):
             combined_result[record['id']] = record
 
     final_result = list(combined_result.values())
-    print ( final_result)
     return final_result
+
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -680,3 +703,74 @@ def process_payment_and_payout(request):
     except Exception as e:
         print(e)
         return JsonResponse({'error': str(e)}, status=500)
+    
+
+import json
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+import requests
+
+def receipt_scanner(picture):
+    amount_description = []
+    currency_total = []
+
+    receiptOcrEndpoint = 'https://ocr.asprise.com/api/v1/receipt'  # Receipt OCR API endpoint
+    imageFile = picture
+    try:
+        print("try 1")
+        r = requests.post(receiptOcrEndpoint, data={
+            'api_key': 'TEST',        # Use 'TEST' for testing purpose
+            'recognizer': 'auto',     # can be 'US', 'CA', 'JP', 'SG' or 'auto'
+            'ref_no': 'ocr_python_123',  # optional caller provided ref code
+        }, files={"file": open(imageFile, "rb")})
+    except:
+        print("try 2")
+        receiptOcrEndpoint ='http://ocr2.asprise.com/api/v1/receipt' #(HTTP - backup)
+        r = requests.post(receiptOcrEndpoint, data={
+            'api_key': 'TEST',        # Use 'TEST' for testing purpose
+            'recognizer': 'auto',     # can be 'US', 'CA', 'JP', 'SG' or 'auto'
+            'ref_no': 'ocr_python_123',  # optional caller provided ref code
+        }, files={"file": open(imageFile, "rb")})
+
+
+
+    json_data = json.loads(r.text)
+
+    for dikt in json_data['receipts'][0]['items']:
+        amount = dikt['amount']
+        description = dikt['description']
+
+        amount_description.append(dict(amount=amount, description=description))
+
+    currency_total.append(json_data['receipts'][0]['currency'])
+    currency_total.append(json_data['receipts'][0]['total'])
+    print(amount_description, currency_total)
+    return amount_description, currency_total
+
+@csrf_exempt
+def scan_receipt_view(request):
+    if request.method == 'POST':
+        if 'receipt' not in request.FILES:
+            return HttpResponseBadRequest('No file part in the request')
+
+        receipt_file = request.FILES['receipt']
+        
+        # Save the uploaded file to a temporary location
+        with open('temp_receipt.jpg', 'wb+') as temp_file:
+            for chunk in receipt_file.chunks():
+                temp_file.write(chunk)
+
+        try:
+            amount_description, currency_total = receipt_scanner('temp_receipt.jpg')
+
+            response_data = {
+                'items': amount_description,
+                'currency': currency_total[0],
+                'total': currency_total[1],
+            }
+            
+            return JsonResponse(response_data, safe=False)
+        except Exception as e:
+            return HttpResponseBadRequest(f'Error processing receipt: {str(e)}')
+    else:
+        return HttpResponseBadRequest('Invalid request method')

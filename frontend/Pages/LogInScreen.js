@@ -15,7 +15,7 @@ const LogInScreen = ({ navigation }) => {
       <HeaderBar
         style={styles.header_container}
         navigation={navigation}
-        goBack={true}
+        goBack={false}
         person={false}
         home={false}
         bars={false}

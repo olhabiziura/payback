@@ -10,6 +10,40 @@ const MembersPage = ({ route, navigation }) => {
   const [memberNames, setMemberNames] = useState([]);
   const [newMember, setNewMember] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [friends, setFriends] = useState([]);
+  const [people, setPeople] = useState([]);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const response = await api.get('/api/friends/');
+        setFriends(response.data.friends);
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      }
+    };
+
+    fetchFriends();
+  }, []);
+
+  const handleAddPerson_list = (friend) => {
+    // Check if the person with the provided ID is already in the list
+    if (!people.some(person => person.id === friend.id)) {
+      const newPerson = { name: friend.name, id: friend.id };
+      setPeople([...people, newPerson]);
+    }
+  };
+  const handleAddPerson = () => {
+    if (manualEntry.trim() !== '') {
+      const newPerson = { name: manualEntry.trim(), id: null };
+      setPeople([...people, newPerson]);
+      setManualEntry('');
+    }
+  };
+
+  const handleRemovePerson = (index) => {
+    setPeople(people.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     const fetchGroupDetails = async () => {
@@ -87,7 +121,11 @@ const MembersPage = ({ route, navigation }) => {
             )}
           />
           {isEditing && (
+            <View>
+            <Text style={styles.attentionText}>Attention! If the user you are trying to delete has some unpaid debts you won't be able to delete them.</Text>
+
             <View style={styles.addMemberContainer}>
+              
               <TextInput
                 style={styles.input}
                 placeholder="Enter member name"
@@ -95,6 +133,22 @@ const MembersPage = ({ route, navigation }) => {
                 onChangeText={setNewMember}
               />
               <Button title="Add Member" onPress={addMember} />
+
+
+            </View>
+            <Text style={styles.label}>Choose a friend:</Text>
+              <FlatList
+                data={friends}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => handleAddPerson_list(item)}>
+                    <View style={styles.friendItem}>
+                      <Text>{item.name}</Text>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item.id.toString()}
+                style={styles.friendList}
+              />            
             </View>
           )}
         </>
@@ -170,6 +224,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F4F4F4',
     paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+  },
+    attentionText: {
+    color: 'red',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  friendList: {
+    maxHeight: 150,
+  },
+  friendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
 

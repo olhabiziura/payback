@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Alert } from 'react-native';
 import { CardField, useStripe } from '@stripe/stripe-react-native';
 import axios from 'axios';
-
+import HeaderBar from './HeaderBar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const PaymentForm = () => {
   const { confirmPayment } = useStripe();
 
@@ -54,6 +55,7 @@ const PaymentForm = () => {
   };
 
   return (
+    
     <View style={{ padding: 20 }}>
       <TextInput
         placeholder="Recipient's IBAN"
@@ -80,6 +82,7 @@ const PaymentForm = () => {
       />
       <Button title="Pay Now" onPress={handlePayment} />
     </View>
+   
   );
 };
 

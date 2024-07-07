@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../api';
 import React from 'react';
 import handleLogIn from './handleLogIn';
+import {  registerForPushNotificationsAsync,fetchExpensesAndScheduleNotifications } from '../../NotificationService';
 
 const handleSignUp = async (navigation, username, email, password, repeatPassword, isAuthenticated, setIsAuthenticated) => {
   if (password === repeatPassword && password !== '') {
@@ -20,6 +21,10 @@ const handleSignUp = async (navigation, username, email, password, repeatPasswor
 
       
       console.log('Registration is successful');
+
+      registerForPushNotificationsAsync();
+      fetchExpensesAndScheduleNotifications();
+      //navigation.navigate('After Sign Up')
       handleLogIn(navigation,username,password,isAuthenticated,setIsAuthenticated);
       
 

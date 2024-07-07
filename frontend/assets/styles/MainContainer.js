@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
         marginVertical : 20,
         paddingTop : 120,
         paddingBottom: 100,
-        borderRadius: 25, // Set the border radius to half of width and height to make it round
-        borderWidth: 3,
+        borderRadius: 550, // Set the border radius to half of width and height to make it round
+        borderWidth: 13,
         borderColor: 'white',
       },
       content: {

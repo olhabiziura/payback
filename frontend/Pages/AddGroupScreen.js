@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Keyboard } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Keyboard, SafeAreaView, ScrollView } from 'react-native';
 import api from '../api';
 import { Platform, StatusBar } from "react-native";
+import HeaderBar from '../components/HeaderBar';
 const AddGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -21,6 +22,7 @@ const AddGroupScreen = ({ navigation }) => {
 
     fetchFriends();
   }, []);
+
   const handleAddPerson_list = (friend) => {
     // Check if the person with the provided ID is already in the list
     if (!people.some(person => person.id === friend.id)) {
@@ -59,7 +61,10 @@ const AddGroupScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style = {styles.safeArea}>
+    <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
+
+    <ScrollView style={styles.container}>
       <Text style={styles.label}>Enter Group Name:</Text>
       <TextInput
         style={styles.input}
@@ -107,6 +112,7 @@ const AddGroupScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
         <Text style={styles.addButtonText}>Add Group</Text>
       </TouchableOpacity>
+    </ScrollView>
     </View>
   );
 };
@@ -164,7 +170,12 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight-50 : 0,
+  },
+  header_container:{
+    
+    alignSelf: 'center',
+    justifyContent: 'center'
   },
 });
 

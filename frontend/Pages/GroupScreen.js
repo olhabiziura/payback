@@ -97,7 +97,7 @@ const GroupDetailsPage = ({ route }) => {
           )}
            <View style={styles.expenseHeader}>
           <Text style={styles.subTitle}>History of expenses:</Text>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('GraphSummary')}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BarGraph for group', { groupID: groupId, groupName:groupData.name })}>
                 <FontAwesome name="bar-chart" size={24} color="black" />
           </TouchableOpacity>
           </View>

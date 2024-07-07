@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import Index, RegisterView, protected_view, user_groups, create_group, delete_groups, update_profile, get_profile_data, get_group_details, update_group_members, create_expense, get_profile, get_expense_details, search_users, add_friend, get_friends_list, get_overall_graph, get_user_ows_serialised, process_payment_and_payout
+from .views import Index, RegisterView, protected_view, user_groups, create_group, delete_groups, update_profile, get_profile_data, get_group_details, update_group_members, create_expense, get_profile, get_expense_details, search_users, add_friend, get_friends_list, get_overall_graph, get_user_ows_serialised, process_payment_and_payout, scan_receipt_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/friends/', get_friends_list, name='get_friends_list'),
     path('api/graph-data/', get_overall_graph, name='get_graph'),
     path('api/user-owes/', get_user_ows_serialised, name='get_owes'),
+    path('scan-receipt/', scan_receipt_view, name='scan_receipt'),
 
 
     path('process-payment-and-payout/', process_payment_and_payout, name='create_payment_intent'),

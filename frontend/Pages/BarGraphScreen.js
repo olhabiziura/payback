@@ -1,25 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
 import api from '../api';
 import { Platform, StatusBar } from "react-native";
-
 
 const screenHeight = Dimensions.get('window').height;
 const maxBarHeight = screenHeight / 3;
 
 const BarGraphScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
-  const screenWidth = Dimensions.get('window').width;
-  const screenHeight = Dimensions.get('window').height;
-  const barWidth = 40; // Adjust the width of each bar as needed
-  const maxBarHeight = screenHeight / 3; // Max height of bars
+  const [isEmptyData, setIsEmptyData] = useState(true); // State to track if data is empty
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await api.get('/api/graph-data/');
+        const params = {
+          filter: 'all',
+        };
+        const response = await api.get('/api/graph-data/', { params });
         const fetchedData = response.data;
 
         // Transform the fetched data into the desired format
@@ -27,8 +26,10 @@ const BarGraphScreen = ({ navigation }) => {
           label: item.name, // Change 'name' to 'label' for better understanding
           value: parseFloat(item.amount), // Ensure value is a number
         }));
-
         setData(transformedData);
+
+        // Check if data is empty
+        setIsEmptyData(transformedData.length === 0);
       } catch (error) {
         console.error('Error fetching data: ', error);
       }
@@ -37,14 +38,21 @@ const BarGraphScreen = ({ navigation }) => {
     fetchData();
   }, []);
 
-
-  
-  if (data.length === 0) {
-    return <Text>Loading...</Text>;
+  if (isEmptyData) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
+        <View style={styles.containerMain}>
+          <Text style={styles.title}>Today you are balanced out!</Text>
+          <Image source={require('../assets/images/happy_panda (2).png')} style={styles.image} />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   // Find the maximum absolute value to scale the bars
   const maxValue = Math.max(...data.map(item => Math.abs(item.value)));
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
@@ -111,7 +119,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 10,
-    
   },
   graphContainer: {
     flexDirection: 'row',
@@ -152,6 +159,11 @@ const styles = StyleSheet.create({
     right: 0,
     height: 1,
     backgroundColor: 'black',
+  },
+  image: {
+    width : 150,
+    height : 150,
+   
   },
 });
 

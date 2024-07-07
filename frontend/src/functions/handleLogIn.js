@@ -2,7 +2,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../api';
 import React from 'react'; 
-import {  registerForPushNotificationsAsync,fetchExpensesAndScheduleNotifications } from '../../NotificationService';
+
 
 const handleLogIn = async (navigation, username, password, isAuthenticated, setIsAuthenticated) => {
   try {
@@ -24,9 +24,7 @@ const handleLogIn = async (navigation, username, password, isAuthenticated, setI
     setIsAuthenticated(true);
     
     
-    registerForPushNotificationsAsync();
-    fetchExpensesAndScheduleNotifications();
-
+    
     // Navigate to the home screen after successful log-in
     navigation.navigate("Home Page");
 

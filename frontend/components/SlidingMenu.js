@@ -44,7 +44,9 @@ const SlidingMenu = ({ navigation, isVisible, onClose }) => {
                 <TouchableOpacity onPress={() => navigation.navigate('SpinWheel')} >
                 <Text style={styles.menuText}>Roulette</Text>
                 </TouchableOpacity>
-                <Text style={styles.menuText}>Random Number Generator</Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Receipt Scan')} >
+                <Text style={styles.menuText}>Receipt Scanner</Text>
+                </TouchableOpacity>
                 <Text style={styles.menuText}>Some other random game</Text>
             </Animated.View>
         </PanGestureHandler>

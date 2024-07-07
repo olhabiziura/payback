@@ -18,7 +18,7 @@ const SignUpScreen = ({ navigation }) => {
       <HeaderBar 
             style={styles.header_container} 
             navigation={navigation} 
-            goBack={false} 
+            goBack={true} 
             person={false} 
             home={false} 
             bars={false} 

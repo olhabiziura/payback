@@ -1,0 +1,203 @@
+{
+      "merchant_name": "ROME POINT SAS DI AKON ANAMUL HOQUE E C.",
+      "merchant_address": "VIA GIOBERTI 11/B",
+      "merchant_phone": null,
+      "merchant_website": null,
+      "merchant_tax_reg_no": "09254211007",
+      "merchant_company_reg_no": null,
+      "region": null,
+      "mall": null,
+      "country": "IT",
+      "receipt_no": "1763-0074",
+      "date": "2024-06-23",
+      "time": "16:18",
+      "items": [
+            {
+                  "amount": 6.5,
+                  "category": null,
+                  "description": "REPARTO 01",
+                  "flags": " C",
+                  "qty": null,
+                  "remarks": null,
+                  "tags": null,
+                  "unitPrice": null
+            }
+      ],
+      "currency": "EUR",
+      "total": 6.5,
+      "subtotal": null,
+      "tax": null,
+      "service_charge": null,
+      "tip": null,
+      "payment_method": null,
+      "payment_details": null,
+      "credit_card_type": null,
+      "credit_card_number": null,
+      "ocr_text": "          ROME POINT SAS\n    DI AKON ANAMUL HOQUE E C.\n        VIA GIOBERTI 11/B\n            00185 ROMA\n        P.IVA 09254211007\n       DOCUMENTO COMMERCIALE\n      di vendita o prestazione\n DESCRIZIONE       PREZZO () TVA\n REPARTO 01               6.50 C\n TOTALE COMPLESSIVO         6.50\n DI CUI IVA                 0.25\n PAGAMENTO CONTANTE         6.50\n IMPORTO PAGATO             6.50\n C: IVA 4.00%\n                   DOC 1763-0074\n 23/06/24 16:18\n         RT 1RENI053136",
+      "ocr_confidence": 94.91,
+      "width": 424,
+      "height": 758,
+      "avg_char_width": 13.2758,
+      "avg_line_height": 26.9443,
+      "conf_amount": 83,
+      "source_locations": {
+            "date": [
+                  [
+                        {
+                              "x": 241,
+                              "y": 243
+                        },
+                        {
+                              "x": 247,
+                              "y": 451
+                        },
+                        {
+                              "x": 213,
+                              "y": 452
+                        },
+                        {
+                              "x": 207,
+                              "y": 244
+                        }
+                  ]
+            ],
+            "total": [
+                  [
+                        {
+                              "x": 530,
+                              "y": 609
+                        },
+                        {
+                              "x": 531,
+                              "y": 670
+                        },
+                        {
+                              "x": 482,
+                              "y": 671
+                        },
+                        {
+                              "x": 481,
+                              "y": 610
+                        }
+                  ]
+            ],
+            "receipt_no": [
+                  [
+                        {
+                              "x": 259,
+                              "y": 553
+                        },
+                        {
+                              "x": 282,
+                              "y": 666
+                        },
+                        {
+                              "x": 256,
+                              "y": 672
+                        },
+                        {
+                              "x": 233,
+                              "y": 558
+                        }
+                  ]
+            ],
+            "merchant_name": [
+                  [
+                        {
+                              "x": 917,
+                              "y": 351
+                        },
+                        {
+                              "x": 930,
+                              "y": 555
+                        },
+                        {
+                              "x": 874,
+                              "y": 559
+                        },
+                        {
+                              "x": 860,
+                              "y": 355
+                        }
+                  ],
+                  [
+                        {
+                              "x": 848,
+                              "y": 268
+                        },
+                        {
+                              "x": 864,
+                              "y": 631
+                        },
+                        {
+                              "x": 836,
+                              "y": 632
+                        },
+                        {
+                              "x": 819,
+                              "y": 269
+                        }
+                  ]
+            ],
+            "doc": [
+                  [
+                        {
+                              "x": 958,
+                              "y": 209
+                        },
+                        {
+                              "x": 972,
+                              "y": 676
+                        },
+                        {
+                              "x": 139,
+                              "y": 702
+                        },
+                        {
+                              "x": 124,
+                              "y": 235
+                        }
+                  ]
+            ],
+            "merchant_address": [
+                  [
+                        {
+                              "x": 820,
+                              "y": 330
+                        },
+                        {
+                              "x": 828,
+                              "y": 578
+                        },
+                        {
+                              "x": 800,
+                              "y": 579
+                        },
+                        {
+                              "x": 790,
+                              "y": 331
+                        }
+                  ]
+            ],
+            "merchant_tax_reg_no": [
+                  [
+                        {
+                              "x": 757,
+                              "y": 417
+                        },
+                        {
+                              "x": 761,
+                              "y": 576
+                        },
+                        {
+                              "x": 731,
+                              "y": 577
+                        },
+                        {
+                              "x": 727,
+                              "y": 418
+                        }
+                  ]
+            ]
+      }
+}

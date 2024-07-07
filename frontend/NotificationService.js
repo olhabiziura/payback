@@ -29,7 +29,7 @@ const registerForPushNotificationsAsync = async () => {
                 status = 'granted'; // Manually set status to granted
               }
             },
-            { text: 'Exit App', onPress: () => exitApp() },
+            { text: 'Do not allow', onPress: () => exitApp() },
           ],
           { cancelable: false }
         );

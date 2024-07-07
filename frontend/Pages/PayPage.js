@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView,ScrollView,Platform } from 'react-native';
+import { View, TextInput, Button, Alert, StyleSheet, Text, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView,ScrollView,Platform,StatusBar, SafeAreaView } from 'react-native';
 import { CardField, useStripe } from '@stripe/stripe-react-native';
 import api from '../api'; // Assuming this is correctly importing your Axios instance
 import { StripeWrapper } from '../config/stripeConfig';
+import HeaderBar from '../components/HeaderBar';
 const PaymentForm = ({ navigation }) => {
     
     const { confirmPayment } = useStripe();
@@ -44,6 +45,9 @@ const PaymentForm = ({ navigation }) => {
   };
 
   return (
+    <View style = {styles.safeArea}>
+      <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
+
     <StripeWrapper>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
@@ -83,10 +87,16 @@ const PaymentForm = ({ navigation }) => {
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </StripeWrapper>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight-50 : 0,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

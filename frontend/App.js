@@ -37,7 +37,30 @@ import { registerForPushNotificationsAsync, fetchExpensesAndScheduleNotification
 
 import PaymentForm from './Pages/PayPage';
 
+const refreshAccessToken = async () => {
+  try {
+    const refreshToken = await AsyncStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      console.log('No refresh token found');
+      return;
+    }
 
+    const response = await api.post('/refresh-token', { refreshToken });
+    const newToken = response.data.accessToken;
+    const newRefreshToken = response.data.refreshToken;
+
+    // Save new tokens in AsyncStorage
+    await AsyncStorage.setItem('token', newToken);
+    await AsyncStorage.setItem('refreshToken', newRefreshToken);
+
+    // Set the new token in state
+    setToken(newToken);
+
+    console.log('Token refreshed successfully');
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+  }
+};
 
 const Stack = createStackNavigator();
 

@@ -6,6 +6,7 @@ import HeaderBar from '../components/HeaderBar';
 
 const ReceiptScanAddExpense = ({ navigation, route }) => {
   const { groupdata, data } = route.params || {};
+  console.log(route.params)
   const groupId = groupdata.id;
   console.log("Data in expense page " + JSON.stringify(data.items));
 

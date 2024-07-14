@@ -13,6 +13,7 @@ const ReceiptScanAddGroup = ({ navigation, route }) => {
   const { data } = route.params || {};
 
   console.log(data)
+
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -45,7 +46,7 @@ const ReceiptScanAddGroup = ({ navigation, route }) => {
     setPeople(people.filter((_, i) => i !== index));
   };
 
-  const handleAddGroup = async () => {
+  const handleAddGroup = async (data) => {
     if (groupName.trim() && people.length > 0) {
       try {
         const response = await api.post('/api/addgroup/', {

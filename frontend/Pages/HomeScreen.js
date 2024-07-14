@@ -64,7 +64,7 @@ const HomeScreen = ({ navigation }) => {
           icon="cash-outline"
         />
         <CustomButton
-          title="Group Expenses"
+          title="Check & Create Groups"
           onPress={() => handlePress('Groups')}
           titleColor="black"
           backgroundColor="#e7e7e7"

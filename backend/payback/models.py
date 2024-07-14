@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
-
+from django.utils import timezone
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -64,7 +64,7 @@ class Owes(models.Model):
     member = models.ForeignKey(Membership, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
+    date = models.DateTimeField(default=timezone.now())
     def __str__(self):
         return f"Owes: {self.expense} - {self.member}"
     

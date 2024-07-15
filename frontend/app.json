@@ -1,7 +1,8 @@
 {
   "expo": {
     "notification": {
-      "icon": "./local/assets/notification-icon.png",
+      
+      "icon": "./assets/images/noti.png",
       "color": "#ffffff"
     },
     "name": "payback-wkjxrfehs85otmlqurexl",

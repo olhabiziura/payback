@@ -45,11 +45,11 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       const response = await api.get(`/api/user-profile/${userId}/`);
       const profileData = response.data;
       setProfilePicture(profileData.profile_picture);
-      setName(profileData.name);
-      setUsername(profileData.username);
-      setSurname(profileData.surname);
+      setName(profileData.user.name);
+      setUsername(profileData.user.username);
+      setSurname(profileData.user.surname);
       setPaymentDetails(profileData.iban);
-      setEmail(profileData.email);
+      setEmail(profileData.user.email);
       setFriends(profileData.friends);
       setAmountOwed(profileData.amountOwed);
       setAmountOwedToYou(profileData.amountOwedToYou);
@@ -141,7 +141,8 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
 
   const handleLogout = () => {
         // Native Notify Indie Push Registration Code
-        unregisterIndieDevice( username, 22472, 'WZOyPqf6yGb8GudffQu8ZH');
+        console.log(username, "there should be the username")
+        unregisterIndieDevice(username, 22472, 'WZOyPqf6yGb8GudffQu8ZH');
         // End of Native Notify Code
     // Implement your logout logic here
     // For example, clear authentication tokens, navigate to the login screen, etc.

@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(allow_null=True, required=False)
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['first_name', 'last_name', 'email', 'username']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer()

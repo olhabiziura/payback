@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 def check_variables():
     while True:
-        time.sleep(40)
+        time.sleep(1)
         
         # Your logic to check variables
         another()
@@ -34,7 +34,8 @@ def another():
         # Add 'paidBy' field to expense_data
             
                 
-                
+                if member.name == owed_to_user.username: 
+                    continue
                 
                
                 if time_diff > timedelta(seconds=time_debt) : 
@@ -44,7 +45,7 @@ def another():
                         'appId': 22472,
                         'appToken': 'WZOyPqf6yGb8GudffQu8ZH',
                         'title': f"Hello {member.name} you owe {owe.amount} to: {owed_to_user.username}",
-                        'message': f"Its been {time_debt} since you owe, pls pay asap",
+                        'message': f"Its been {time_debt} seconds since you owe, pls pay asap",
                         'dateSent': timezone.now().isoformat(),
                        
                     }

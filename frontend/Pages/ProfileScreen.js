@@ -7,8 +7,9 @@ import api from '../api';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
 import styles from '../assets/styles/MainContainer';
-
+import { registerIndieID, unregisterIndieDevice } from 'native-notify';
 const ProfileScreen = ({ navigation, route, requester_id }) => {
+  const[username, setUsername] = useState('')
   const [name, setName] = useState('John');
   const [surname, setSurname] = useState('Doe');
   const [paymentDetails, setPaymentDetails] = useState('IBAN: 123456789');
@@ -17,19 +18,20 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
   const [friends, setFriends] = useState([]);
   const [amountOwed, setAmountOwed] = useState(0);
   const [amountOwedToYou, setAmountOwedToYou] = useState(0);
-  const [myId, setMyId] = useState(null)
+  const [myId, setMyId] = useState(null);
   const { user_id } = route.params;
   const authenticatedUserId = myId;
+
   const fetchUserData = async () => {
     try {
       const userResponse = await api.get(`/api/users/me/`);
       const userData = userResponse.data;
       setMyId(userData.id);
-     
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
+
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -44,6 +46,7 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       const profileData = response.data;
       setProfilePicture(profileData.profile_picture);
       setName(profileData.name);
+      setUsername(profileData.username);
       setSurname(profileData.surname);
       setPaymentDetails(profileData.iban);
       setEmail(profileData.email);
@@ -136,6 +139,15 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
     }
   };
 
+  const handleLogout = () => {
+        // Native Notify Indie Push Registration Code
+        unregisterIndieDevice( username, 22472, 'WZOyPqf6yGb8GudffQu8ZH');
+        // End of Native Notify Code
+    // Implement your logout logic here
+    // For example, clear authentication tokens, navigate to the login screen, etc.
+    navigation.navigate('Log In'); // Assuming 'Login' is the name of your login screen
+  };
+
   return (
     <SafeAreaView style={stylesprofile.safeArea}>
       <HeaderBar
@@ -149,25 +161,24 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       />
       <View style={stylesprofile.container_main}>
         <ScrollView contentContainerStyle={stylesprofile.container_main}>
-         {/*<Text style={styles.title}>Profile</Text>*/}
           <View style={stylesprofile.img}>
             {image && <Image source={{ uri: image }} style={stylesprofile.tempprofilepic} />}
             {isEditable && <Button title="Pick an image from camera roll" onPress={pickImage} />}
           </View>
           <View style={stylesprofile.titleContainer}>
-              {authenticatedUserId === user_id ? (
-                <>
-                  {isEditable ? (
-                    <View style={stylesprofile.buttonContainer}>
-                      <Button title="Done" onPress={handleDoneEditing} />
-                      <Button title="Cancel" onPress={handleCancelEditing} />
-                    </View>
-                  ) : (
-                    <Button title="Edit" onPress={handleEditProfile} />
-                  )}
-                </>
-              ) : null}
-            </View>
+            {authenticatedUserId === user_id ? (
+              <>
+                {isEditable ? (
+                  <View style={stylesprofile.buttonContainer}>
+                    <Button title="Done" onPress={handleDoneEditing} />
+                    <Button title="Cancel" onPress={handleCancelEditing} />
+                  </View>
+                ) : (
+                  <Button title="Edit" onPress={handleEditProfile} />
+                )}
+              </>
+            ) : null}
+          </View>
           <TextInput
             style={stylesprofile.input}
             placeholder="Name"
@@ -201,11 +212,11 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
               {authenticatedUserId === user_id ? 'My Friends' : `Friends of ${name}`}
             </Text>
             {authenticatedUserId === user_id ? (
-                <>
-            <TouchableOpacity onPress={() => navigation.navigate('AddFriends', { userId: user_id })}>
-              <Feather name="plus-circle" size={24} color="blue" marginRight={40} />
-            </TouchableOpacity>
-            </>
+              <>
+                <TouchableOpacity onPress={() => navigation.navigate('AddFriends', { userId: user_id })}>
+                  <Feather name="plus-circle" size={24} color="blue" marginRight={40} />
+                </TouchableOpacity>
+              </>
             ) : null}
           </View>
           <FlatList
@@ -219,6 +230,9 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
               <Text style={stylesprofile.amountText}>You owe to {name}: {amountOwed}</Text>
               <Text style={stylesprofile.amountText}>{name} owes you: {amountOwedToYou}</Text>
             </View>
+          )}
+          {authenticatedUserId === user_id && (
+            <Button title="Logout" onPress={handleLogout} />
           )}
         </ScrollView>
       </View>
@@ -270,11 +284,8 @@ const stylesprofile = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    //paddingLeft: 200,
     justifyContent: 'space-between',
     marginBottom: 10,
-    
-
   },
   img: {
     marginBottom: 20,
@@ -304,7 +315,6 @@ const stylesprofile = StyleSheet.create({
     height: '90%',
     width: 425,
     paddingLeft: 10,
-
   },
   safeArea: {
     flex: 1,

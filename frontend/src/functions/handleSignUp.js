@@ -20,9 +20,7 @@ const handleSignUp = async (navigation, username, email, password, repeatPasswor
         password: password,
       });
 
-        // Native Notify Indie Push Registration Code
-       registerIndieID('put your unique user ID here as a string', 22426, 'VocpCXxZk1RDjvw07p3mXF');
-    // End of Native Notify Code
+      
       console.log('Registration is successful');
 
       registerForPushNotificationsAsync();

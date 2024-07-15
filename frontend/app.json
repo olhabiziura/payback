@@ -1,5 +1,9 @@
 {
   "expo": {
+    "notification": {
+      "icon": "./local/assets/notification-icon.png",
+      "color": "#ffffff"
+    },
     "name": "payback-wkjxrfehs85otmlqurexl",
     "slug": "payback-wkjxrfehs85otmlqurexl",
     "version": "1.0.0",
@@ -15,22 +19,27 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.senpai228.paybackwkjxrfehs85otmlqurexl"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.senpai228.paybackwkjxrfehs85otmlqurexl"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "owner": "senpai228",
     "extra": {
       "eas": {
-        "projectId": "bdbde276-cb79-46c0-a4fa-7a38b3df3187"
+        "projectId": "cdc9b316-8a41-4370-a076-198d20ccf18d"
       }
     },
-    "owner": "olhabiziura"
+    "plugins": [
+      "expo-build-properties"
+    ]
   }
 }

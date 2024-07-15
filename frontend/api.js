@@ -9,7 +9,7 @@ const api = axios.create({
   //'http://10.37.224.202:8000'
   //'http://192.168.1.227:8000'
  //'http://172.20.10.4:8000'
- 'http://192.168.48.97:8000'
+ ' http://192.168.224.226:8000'
   
     // Replace with your local IP address
 });

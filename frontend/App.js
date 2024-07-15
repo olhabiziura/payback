@@ -30,24 +30,33 @@ import ReceiptScanGroup from './Pages/ReceiptScanGroup';
 import ReceiptScanAddGroup from './Pages/ReceiptScanAddGroup';
 import ReceiptScanAddExpense from './Pages/ReceiptScanAddExpenses';
 
-import Notifications from 'expo';
+import * as Notifications from "expo-notifications";
 import moment from 'moment';
 import api from './api';
 import { registerForPushNotificationsAsync, fetchExpensesAndScheduleNotifications } from './NotificationService';
-
+import registerNNPushToken from 'native-notify';
 import PaymentForm from './Pages/PayPage';
 
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const Stack = createStackNavigator();
 
 const App = () => {
+
+
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState([]);
   const [token, setToken] = useState(null); // State to store the token
   const [refreshing, setRefreshing] = useState(false);
 
-
+  registerNNPushToken(22472, 'WZOyPqf6yGb8GudffQu8ZH');
 
 
   {/*
@@ -81,11 +90,12 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    
     const checkAuthStatus = async () => {
       const storedToken = await AsyncStorage.getItem('token');
       if (storedToken) {
         // Check token expiration
-        const tokenExpireTime = decodeToken(storedToken).exp * 1000; // Convert to milliseconds
+        const tokenExpireTime = decodeToken(storedToken).exp * 100000; // Convert to milliseconds
         const currentTime = new Date().getTime();
 
         if (tokenExpireTime < currentTime) {

@@ -41,10 +41,10 @@ def another():
                     url = "https://app.nativenotify.com/api/indie/notification"
                     obj  =       {
                         'subID': member.name ,
-                        'appId': 22426,
-                        'appToken': "VocpCXxZk1RDjvw07p3mXF",
-                        'title': f"you owe {owe.amount} to: {owed_to_user.username}",
-                        'body': f"Its been {time_debt} since you owe, pls pay asap",
+                        'appId': 22472,
+                        'appToken': 'WZOyPqf6yGb8GudffQu8ZH',
+                        'title': f"Hello {member.name} you owe {owe.amount} to: {owed_to_user.username}",
+                        'message': f"Its been {time_debt} since you owe, pls pay asap",
                         'dateSent': timezone.now().isoformat(),
                        
                     }
@@ -60,9 +60,9 @@ def another():
                     print(response.status_code)
                     print(response.content)
           
-                    time.sleep(10)
+                    time.sleep(1)
        
-        time.sleep(25)  # Adjust the s
+        time.sleep(1)  # Adjust the s
 
 def start_background_task():
     thread = threading.Thread(target=check_variables)

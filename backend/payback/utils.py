@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 def check_variables():
     while True:
-        time.sleep(1000000)
+        time.sleep(1)
         
         # Your logic to check variables
         another()
@@ -61,9 +61,9 @@ def another():
                     print(response.status_code)
                     print(response.content)
           
-                    time.sleep(100000000)
+                    time.sleep(1)
        
-        time.sleep(10000000)  # Adjust the s
+        time.sleep(1)  # Adjust the s
 
 def start_background_task():
     thread = threading.Thread(target=check_variables)

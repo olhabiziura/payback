@@ -12,7 +12,7 @@ import pytz
 
 def check_variables():
     while True:
-        time.sleep(10)
+        time.sleep(40)
         
         # Your logic to check variables
         another()
@@ -73,9 +73,9 @@ def another():
                     print(response.status_code)
                     print(response.content)
           
-                    time.sleep(10)
+                    time.sleep(20)
        
-        time.sleep(40)  # Adjust the s
+        time.sleep(80)  # Adjust the s
 
 def start_background_task():
     thread = threading.Thread(target=check_variables)

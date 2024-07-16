@@ -9,31 +9,25 @@ const HomeScreen = ({ navigation }) => {
   const [name, setName] = useState(null);
   const [surname, setSurname] = useState(null);
   const [myId, setMyId] = useState(null);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-      const userResponse = await api.get(`/api/users/me/`);
-      const userData = userResponse.data;
-      console.log(userData)
-      setMyId(userData.id);
-      setName(userData.name);
-      setSurname(userData.surname);
-      console.log(typeof(userData.name), userData.surname)
-        // Navigate to AfterSignUpScreen if name and surname are empty
-        if(userData.name === "" || userData.surname === "") {
-          console.log(userData.name, userData.surname)
+        const userResponse = await api.get(`/api/users/me/`);
+        const userData = userResponse.data;
+        setMyId(userData.id);
+        setName(userData.name);
+        setSurname(userData.surname);
+        if (userData.name === "" || userData.surname === "") {
           navigation.navigate('After Sign Up');
         }
-        
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
     };
 
     fetchUserData();
-  }, [setName,setSurname]);
-
-  
+  }, [setName, setSurname]);
 
   const handlePress = (screen) => {
     setLoading(true);
@@ -60,21 +54,21 @@ const HomeScreen = ({ navigation }) => {
           title="Check Balance"
           onPress={() => handlePress('BarGraph')}
           titleColor="black"
-          backgroundColor="#e7e7e7"
+          backgroundColor="#f0f0f0"
           icon="cash-outline"
         />
         <CustomButton
           title="Group Expenses"
           onPress={() => handlePress('Groups')}
           titleColor="black"
-          backgroundColor="#e7e7e7"
+          backgroundColor="#f0f0f0"
           icon="people-outline"
         />
         <CustomButton
           title="Payment Page"
           onPress={() => navigation.navigate('Payment Page')}
           titleColor="black"
-          backgroundColor="#e7e7e7"
+          backgroundColor="#f0f0f0"
           icon="card-outline"
         />
         {loading && <ActivityIndicator size="large" color="#000000" style={styles.loader} />}
@@ -128,6 +122,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     alignSelf: 'flex-start',
+    fontFamily: 'System',
   },
   imageHome: {
     width: 250,
@@ -141,12 +136,12 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 30,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-    marginVertical: 15,
-    backgroundColor: '#e7e7e7',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+    marginVertical: 10,
+    backgroundColor: '#f0f0f0',
   },
   buttonContent: {
     flexDirection: 'row',
@@ -160,6 +155,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
     fontWeight: '600',
+    fontFamily: 'System',
   },
   loader: {
     marginTop: 20,

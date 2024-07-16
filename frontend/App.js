@@ -56,7 +56,7 @@ const App = () => {
   const [token, setToken] = useState(null); // State to store the token
   const [refreshing, setRefreshing] = useState(false);
 
-  registerNNPushToken(22472, 'WZOyPqf6yGb8GudffQu8ZH');
+  registerNNPushToken(22505, '8ycZITuSYpxybSMqD8gWSb');
 
 
   {/*

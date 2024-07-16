@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, Platform, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, Platform, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
 import * as ImagePicker from 'expo-image-picker';
 import api from '../api';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
 import styles from '../assets/styles/MainContainer';
 import { registerIndieID, unregisterIndieDevice } from 'native-notify';
+
 const ProfileScreen = ({ navigation, route, requester_id }) => {
-  const[username, setUsername] = useState('')
+  const [username, setUsername] = useState('');
   const [name, setName] = useState('John');
   const [surname, setSurname] = useState('Doe');
   const [paymentDetails, setPaymentDetails] = useState('IBAN: 123456789');
@@ -140,10 +140,10 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
   };
 
   const handleLogout = () => {
-        // Native Notify Indie Push Registration Code
-        console.log(username, "there should be the username")
-        unregisterIndieDevice(username, 22472, 'WZOyPqf6yGb8GudffQu8ZH');
-        // End of Native Notify Code
+    // Native Notify Indie Push Registration Code
+    console.log(username, "there should be the username")
+    unregisterIndieDevice(username, 22472, 'WZOyPqf6yGb8GudffQu8ZH');
+    // End of Native Notify Code
     // Implement your logout logic here
     // For example, clear authentication tokens, navigate to the login screen, etc.
     navigation.navigate('Log In'); // Assuming 'Login' is the name of your login screen
@@ -233,7 +233,11 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
             </View>
           )}
           {authenticatedUserId === user_id && (
-            <Button title="Logout" onPress={handleLogout} />
+            <View style={stylesprofile.logoutContainer}>
+              <TouchableOpacity style={stylesprofile.logoutButton} onPress={handleLogout}>
+                <Text style={stylesprofile.logoutButtonText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </ScrollView>
       </View>
@@ -325,7 +329,26 @@ const stylesprofile = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 10,
+    
+  },
+  logoutContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingRight: 20,
+  },
+  logoutButton: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginVertical: 20,
+    width: '50%',
+  },
+  logoutButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -36,8 +36,13 @@ import api from './api';
 import { registerForPushNotificationsAsync, fetchExpensesAndScheduleNotifications } from './NotificationService';
 import registerNNPushToken from 'native-notify';
 import PaymentForm from './Pages/PayPage';
-
-
+import { LogBox } from 'react-native';
+if (__DEV__) {
+  console.error = () => {};
+  console.warn = () => {};
+  console.log = () => {};
+  LogBox.ignoreAllLogs();
+}
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,

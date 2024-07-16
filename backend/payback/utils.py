@@ -12,7 +12,7 @@ import pytz
 
 def check_variables():
     while True:
-        time.sleep(40)
+        time.sleep(10)
         
         # Your logic to check variables
         another()

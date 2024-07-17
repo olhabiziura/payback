@@ -67,12 +67,7 @@ const BarGraphGroup = ({ navigation, route }) => {
     <SafeAreaView style={styles.safeArea}>
     
       <View style={styles.containerMain}>
-      <Text style={styles.title}>"{groupName}"</Text>
-
-      <Text style={styles.subtitle}>Tap on the bar to reimburse instantly!</Text>
-
-
-
+      <Text style={styles.title}>Bar Graph for {groupName}</Text>
         <View style={styles.graphFrame}>
           <ScrollView horizontal contentContainerStyle={styles.horizontalScroll}>
             <View style={styles.graphContainer}>
@@ -127,7 +122,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: 0,
+    paddingTop: 20,
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -142,29 +137,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    marginBottom: 0,
+    marginBottom: 40,
     fontSize: 24,
-    fontWeight: 'bold',
-    marginVertical: 5,
-    color: '#2471A3',
-  },
-  subtitle: {
-    marginBottom: 0,
-    fontSize: 18,
     fontWeight: 'bold',
     marginVertical: 10,
     color: '#2471A3',
-  },
-  textContainer: {
-    borderWidth: 2,
-    width: '95%',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    borderColor: '#d3d3d3',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 5,
-    
   },
   graphFrame: {
     borderWidth: 2,

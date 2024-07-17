@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Platform } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, TouchableOpacity, Keyboard, SafeAreaView, ScrollView } from 'react-native';
 import api from '../api';
+import { Platform, StatusBar } from "react-native";
 import HeaderBar from '../components/HeaderBar';
-
 const AddGroupScreen = ({ navigation }) => {
   const [groupName, setGroupName] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -24,12 +24,12 @@ const AddGroupScreen = ({ navigation }) => {
   }, []);
 
   const handleAddPerson_list = (friend) => {
+    // Check if the person with the provided ID is already in the list
     if (!people.some(person => person.id === friend.id)) {
       const newPerson = { name: friend.name, id: friend.id };
       setPeople([...people, newPerson]);
     }
   };
-
   const handleAddPerson = () => {
     if (manualEntry.trim() !== '') {
       const newPerson = { name: manualEntry.trim(), id: null };
@@ -61,116 +61,93 @@ const AddGroupScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <HeaderBar navigation={navigation} />
-        <Text style={styles.pageTitle}>Add New Group</Text>
-        <View style={styles.container}>
-          <Text style={styles.label}>Enter Group Name:</Text>
-          <TextInput
-            style={styles.input}
-            value={groupName}
-            onChangeText={setGroupName}
-            placeholder="Group Name"
-            placeholderTextColor="#888"
-          />
-          
-          <Text style={styles.label}>Choose a friend:</Text>
-          <FlatList
-            data={friends}
-            renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => handleAddPerson_list(item)}>
-                <View style={styles.friendItem}>
-                  <Text>{item.name}</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item.id.toString()}
-            style={styles.friendList}
-          />
-          
-          <Text style={styles.label}>Type a name:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a name..."
-            value={manualEntry}
-            onChangeText={setManualEntry}
-            placeholderTextColor="#888"
-          />
-          
-          <TouchableOpacity
-            style={[styles.button, styles.addPersonButton]}
-            onPress={handleAddPerson}
-            disabled={!manualEntry.trim()}
-          >
-            <Text style={styles.buttonText}>Add Person</Text>
-          </TouchableOpacity>
+    <View style = {styles.safeArea}>
 
-          <FlatList
-            data={people}
-            renderItem={({ item, index }) => (
-              <View style={styles.personContainer}>
-                <Text style={styles.person}>{item.name}</Text>
-                <TouchableOpacity onPress={() => handleRemovePerson(index)} style={styles.removeButton}>
-                  <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
+    <View style={styles.container}>
+      <Text style={styles.label}>Enter Group Name:</Text>
+      <TextInput
+        style={styles.input}
+        value={groupName}
+        onChangeText={setGroupName}
+      />
 
-          <TouchableOpacity style={[styles.button, styles.addGroupButton]} onPress={handleAddGroup}>
-            <Text style={styles.buttonText}>Add Group</Text>
+      <Text style={styles.label}>Choose a friend:</Text>
+      <FlatList
+        data={friends}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => handleAddPerson_list(item)}>
+            <View style={styles.friendItem}>
+              <Text>{item.name}</Text>
+            </View>
           </TouchableOpacity>
-        </View>
-    </SafeAreaView>
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        style={styles.friendList}
+      />
+
+      <Text style={styles.label}>Type a name:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Type a name..."
+        value={manualEntry}
+        onChangeText={setManualEntry}
+      />
+
+      <Button title="Add Person" onPress={() => handleAddPerson({ name: manualEntry })} disabled={!manualEntry.trim()} />
+
+      <FlatList
+        data={people}
+        renderItem={({ item, index }) => (
+          <View style={styles.personContainer}>
+            <Text style={styles.person}>{item.name}</Text>
+            <TouchableOpacity onPress={() => handleRemovePerson(index)} style={styles.removeButton}>
+              <Text style={styles.removeButtonText}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
+        <Text style={styles.addButtonText}>Add Group</Text>
+      </TouchableOpacity>
+    </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
-    backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
-  },
-  scrollContainer: {
-    flexGrow: 1,
+    width: '100%',
+    height: '80%',
+    backgroundColor: 'white',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+
   },
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    margin: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#2471A3',
   },
   label: {
     fontSize: 18,
     marginBottom: 10,
-    color: '#333',
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 5,
     marginBottom: 20,
     paddingHorizontal: 10,
-    backgroundColor: '#fff',
   },
   friendList: {
     maxHeight: 150,
-    marginBottom: 20,
   },
   friendItem: {
     flexDirection: 'row',
@@ -189,28 +166,30 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     marginLeft: 10,
-    backgroundColor: '#2471A3',
-    padding: 5,
-    borderRadius: 5,
   },
   removeButtonText: {
-    color: 'white',
+    color: 'red',
   },
-  button: {
-    padding: 15,
-    borderRadius: 5,
+  addButton: {
+    marginBottom: '40%',
+    padding: 10,
+    backgroundColor: 'blue',
     alignItems: 'center',
-    marginBottom: 10,
   },
-  addPersonButton: {
-    backgroundColor: '#2471A3',
-  },
-  addGroupButton: {
-    backgroundColor: '#2471A3',
-  },
-  buttonText: {
+  addButtonText: {
     color: 'white',
     fontSize: 18,
+  },
+  safeArea: {
+    paddingTop: 80,
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+   
+  },
+  header_container:{
+    
+    alignSelf: 'center',
+    justifyContent: 'center'
   },
 });
 

@@ -97,6 +97,7 @@ const MembersPage = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style = {styles.safeArea}>
+    <HeaderBar style = {styles.header_container} navigation={navigation} goBack = {true} person = {true} home = {true} bars ={true} question = {true}/>
 
     <View style={styles.container}>
       {groupData ? (
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: 20,
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
   },
     attentionText: {
     color: 'red',

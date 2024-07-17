@@ -1,34 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView, Platform, StatusBar } from 'react-native';
-import api from '../api';
+import api from '../api'; // Import your API module
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
 
 const ReceiptScanAddExpense = ({ navigation, route }) => {
   const { groupdata, data } = route.params || {};
+  const groupId = groupdata.id;
+  console.log("Data in expense page " + JSON.stringify(data.items));
+
   const [members, setMembers] = useState([]);
-  const [localExpenses, setLocalExpenses] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [localExpenses, setLocalExpenses] = useState(data.items.map(expense => ({
+    name: expense.description,
+    amount: expense.amount,
+    selectedMembers: []
+  })));
 
   useEffect(() => {
-    if (data && data.items) {
-      setLocalExpenses(data.items.map(expense => ({
-        name: expense.description,
-        amount: expense.amount.toString(),
-        selectedMembers: [],
-      })));
-    }
-
     const fetchGroupAndUserDetails = async () => {
       try {
-        const userResponse = await api.get(`/api/users/me/`);
+        // Fetch current user details
+        const userResponse = await api.get(`/api/users/me/`); // Assuming this endpoint returns the current user
         const userData = userResponse.data;
 
+        // Prepare member data
         if (groupdata.members) {
-          const memberData = groupdata.members.map(member => ({
-            id: member.id,
-            name: member.name === userData.username ? `Me (${userData.username})` : member.name,
-          }));
+          const memberData = groupdata.members.map(member => {
+            if (member.name === userData.username) {
+              return { id: member.id, name: `Me (${userData.username})` };
+            }
+            return { id: member.id, name: member.name };
+          });
           setMembers(memberData);
+          setCurrentUser(userData);
         }
       } catch (error) {
         console.error('Error fetching group and user details:', error);
@@ -36,7 +41,7 @@ const ReceiptScanAddExpense = ({ navigation, route }) => {
     };
 
     fetchGroupAndUserDetails();
-  }, [groupdata, data]);
+  }, [groupId]);
 
   const toggleSelectMember = (expenseIndex, memberId) => {
     setLocalExpenses(prevExpenses => {
@@ -64,20 +69,23 @@ const ReceiptScanAddExpense = ({ navigation, route }) => {
   const addExpenses = async () => {
     try {
       for (const expense of localExpenses) {
-        const response = await api.post(`/api/groups/${groupdata.id}/addExpense/`, {
+        const response = await api.post(`/api/groups/${groupId}/addExpense/`, {
           name: expense.name,
-          amount: parseFloat(expense.amount),
-          owes: expense.selectedMembers,
+          amount: expense.amount,
+          owes: expense.selectedMembers
         });
 
         if (response.status === 201) {
+          // Update local expenses after successfully adding expense
+          // Example: Assuming you have a state for all expenses, update it here
+          // updateExpenses(prevExpenses => [...prevExpenses, response.data]); // Uncomment this line if you have an 'updateExpenses' function
           console.log('Expense added successfully:', response.data);
         } else {
           console.error('Failed to add expense:', expense);
         }
       }
       alert('All expenses were added successfully!');
-      navigation.navigate('GroupDetails', { groupId: groupdata.id });
+      navigation.navigate("GroupDetails", { groupId });
     } catch (error) {
       console.error('Error adding expenses:', error);
     }
@@ -85,8 +93,8 @@ const ReceiptScanAddExpense = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true}/>
-      <ScrollView contentContainerStyle={styles.container}>
+      <HeaderBar style={styles.headerContainer} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
+      <ScrollView style={styles.container}>
         <Text style={styles.title}>New Expenses</Text>
         {localExpenses.map((expense, index) => (
           <View key={index} style={styles.expenseContainer}>
@@ -103,7 +111,7 @@ const ReceiptScanAddExpense = ({ navigation, route }) => {
             <TextInput
               style={styles.input}
               placeholder="Amount"
-              value={expense.amount}
+              value={expense.amount.toString()}
               onChangeText={(text) => {
                 const updatedExpenses = [...localExpenses];
                 updatedExpenses[index].amount = text;
@@ -148,32 +156,30 @@ const ReceiptScanAddExpense = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'IOS' ? StatusBar.currentHeight : -50,
     backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight-50 : 0,
+  },
+  headerContainer: {
+    // Add your header styles here if any
   },
   container: {
-    flexGrow: 1,
+    flex: 1,
     paddingHorizontal: 20,
-    paddingVertical: 40,
-    alignItems: 'center',
+    paddingTop: 40,
+    backgroundColor: '#F4F4F4',
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 40,
     color: '#343a40',
+    textAlign: 'center',
   },
   expenseContainer: {
-    width: '100%',
+    marginBottom: 30,
     backgroundColor: '#ffffff',
     borderRadius: 10,
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 2,
   },
   input: {
     height: 40,
@@ -181,7 +187,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    borderRadius: 5,
+    borderRadius: 10,
     backgroundColor: '#ffffff',
   },
   subTitleContainer: {
@@ -191,7 +197,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   subTitle: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#343a40',
   },
   selectAllButton: {
@@ -199,14 +206,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   memberContainer: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    marginVertical: 5,
-    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 15,
+    marginBottom: 5,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#ced4da',
+    alignItems: 'center',
   },
   selectedMemberContainer: {
-    backgroundColor: '#007bff',
+    backgroundColor: 'grey',
   },
   memberText: {
     fontSize: 16,
@@ -214,13 +223,14 @@ const styles = StyleSheet.create({
   },
   selectedMemberText: {
     color: '#ffffff',
+    fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: 'grey',
+    padding: 25,
+    borderRadius: 15,
     alignItems: 'center',
-    marginTop: 20,
+    marginVertical: 30,
   },
   addButtonText: {
     color: '#ffffff',

@@ -64,77 +64,81 @@ const GroupDetailsPage = ({ route }) => {
 
   return (
     <SafeAreaView style = {styles.safeArea}>
-      <HeaderBar style = {styles.header_container} navigation={navigation} goBack={true} person={true} notifications= {true} home={true} bars={true} question={true} />
-      <View style={styles.container}>
-        {groupData ? (
-          <>
-            <View style={styles.header}>
-              <Text style={styles.title}>{groupData.name}</Text>
-            </View>
+    <HeaderBar style = {styles.header_container} navigation={navigation} goBack = {true} person = {true} home = {true} bars ={true} question = {true}/>
 
-            {isEditing ? (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Group Description"
-                  value={groupData.description}
-                  onChangeText={(text) => setGroupData({ ...groupData, description: text })}
-                />
-              </>
-            ) : (
-              <>
-                {/* Display non-editable content here if needed */}
-              </>
+    <View style={styles.container}>
+      {groupData ? (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.title}>{groupData.name}</Text>
+            <Button title={isEditing ? "Done" : "Edit"} onPress={toggleEditing} />
+          </View>
+          <Text style={styles.text}>Group ID: {groupId}</Text>
+          {isEditing ? (
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Group Name"
+                value={groupData.name}
+                onChangeText={(text) => setGroupData({ ...groupData, name: text })}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Group Description"
+                value={groupData.description}
+                onChangeText={(text) => setGroupData({ ...groupData, description: text })}
+              />
+            </>
+          ) : (
+            <>
+              <Text style={styles.text}>Group Name: {groupData.name}</Text>
+              <Text style={styles.text}>Group Description: {groupData.description}</Text>
+            </>
+          )}
+           <View style={styles.expenseHeader}>
+          <Text style={styles.subTitle}>History of expenses:</Text>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BarGraph for group', { groupID: groupId, groupName:groupData.name })}>
+                <FontAwesome name="bar-chart" size={24} color="black" />
+          </TouchableOpacity>
+          </View>
+               
+       
+          <FlatList
+            data={expenses}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.expenseContainer}
+                onPress={() => handleExpensePress(item.id)}
+              >
+                <Text style={styles.expenseText}>{item.name}</Text>
+                <Text style={styles.expenseText}>{item.amount}</Text>
+              </TouchableOpacity>
             )}
-
-            <View style={styles.expenseHeader}>
-              <Text style={styles.subTitle}>History of expenses:</Text>
-              <View style={styles.iconContainer}>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BarGraph for group', { groupID: groupId, groupName: groupData.name })}>
-                  <FontAwesome name="bar-chart" size={24} color="black" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Receipt Scan')}>
-                  <FontAwesome name="camera-retro" size={24} color="black" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <FlatList
-              data={expenses}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.expenseContainer}
-                  onPress={() => handleExpensePress(item.id)}
-                >
-                  <Text style={styles.expenseText}>{item.name}</Text>
-                  <Text style={styles.expenseText}>{item.amount}</Text>
-                </TouchableOpacity>
-              )}
-            />
-
-            <TouchableOpacity style={styles.addButton} onPress={addExpense}>
-              <Ionicons name="add" size={30} color="black" />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.membersButton} onPress={() => navigation.navigate('MembersPage', { groupId })}>
-              <AntDesign name="team" size={24} color="black" />
-            </TouchableOpacity>
-          </>
-        ) : (
-          <Text>Loading...</Text>
-        )}
-      </View>
+          />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={addExpense}
+          >
+            <Ionicons name="add" size={30} color="black" />
+            
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.membersButton}
+            onPress={() => navigation.navigate('MembersPage', { groupId })}
+          >
+            <AntDesign name="team" size={24} color="black" />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <Text>Loading...</Text>
+      )}
+    </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
-  },
   container: {
     flex: 1,
     paddingHorizontal: 20,
@@ -162,18 +166,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-  },
-  iconContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  iconButton: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    marginLeft: 10,
-    elevation: 3,
   },
   expenseContainer: {
     flexDirection: 'row',
@@ -204,6 +196,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   membersButton: {
     position: 'absolute',
     right: 20,
@@ -216,11 +213,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+  },
   expenseHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  expenseText: {
+    fontSize: 16,
   },
   horizontalMenu: {
     marginBottom: 10,
@@ -228,12 +233,14 @@ const styles = StyleSheet.create({
     alignContent: 'center',
   },
   pickerContainer: {
+    
     marginVertical: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
   },
   picker: {
+    //flexDirection: 'row',
     height: 50,
     width: '100%',
   },

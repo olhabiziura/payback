@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { View, Platform } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import Icon1 from 'react-native-vector-icons/Ionicons';
-import Icon2 from 'react-native-vector-icons/Ionicons';
-import SlidingMenu from '../components/SlidingMenu';
-import styles from '../assets/styles/MainContainer';
+import Icon1 from 'react-native-vector-icons/Ionicons'; // Use Ionicons for iOS-like icons
+import Icon2 from 'react-native-vector-icons/Ionicons'; // Use Ionicons for iOS-like icons
+import SlidingMenu from '../components/SlidingMenu'; // Adjust the path as needed
+import styles from '../assets/styles/MainContainer'; // Ensure this path is correct
 import api from '../api';
 
-const HeaderBar = ({ navigation, goBack, person, home, bars, question, title, notifications }) => {
+const HeaderBar = ({ navigation, goBack, person, home, bars, question, title }) => {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const [myId, setMyId] = useState(null);
 
+  // Toggle menu visibility
   const toggleMenu = () => {
     setIsMenuVisible(!isMenuVisible);
   };
 
+  // Fetch user data
   const fetchUserData = async () => {
     try {
       const userResponse = await api.get(`/api/users/me/`);
@@ -38,12 +40,6 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question, title, no
             onPress={() => navigation.goBack()}
           />
         )}
-        {home && (
-          <Appbar.Action
-            icon={() => <Icon1 name="home-outline" size={24} />}
-            onPress={() => navigation.navigate('BarGraph')}
-          />
-        )}
         {person && (
           <Appbar.Action
             icon={() => <Icon1 name="person-circle-outline" size={24} />}
@@ -51,8 +47,7 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question, title, no
           />
         )}
         <View style={styles.flexContainer}>
-          {/* Centered title */}
-          <Appbar.Content title={title} titleStyle={styles.headerTitle} style={styles.centeredTitle} />
+          <Appbar.Content title={title} titleStyle={styles.headerTitle} />
         </View>
         <View style={styles.rightActions}>
           {question && (
@@ -65,12 +60,6 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question, title, no
             <Appbar.Action
               icon={() => <Icon2 name="menu-outline" size={24} />}
               onPress={toggleMenu}
-            />
-          )}
-          {notifications && (
-            <Appbar.Action
-              icon={() => <Icon1 name="notifications-outline" size={24} />}
-              onPress={() => navigation.navigate('Notifications')}
             />
           )}
         </View>

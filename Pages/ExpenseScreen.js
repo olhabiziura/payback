@@ -49,7 +49,15 @@ const ExpenseDetailsPage = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-
+      <HeaderBar
+        style={styles.headerContainer}
+        navigation={navigation}
+        goBack={true}
+        person={true}
+        home={true}
+        bars={true}
+        question={true}
+      />
       <View style={styles.container}>
         {loading ? (
           <ActivityIndicator size="large" color="#007bff" style={styles.loading} />
@@ -61,18 +69,16 @@ const ExpenseDetailsPage = ({ route }) => {
               <Text style={styles.title}>Expense Details</Text>
               <View style={styles.card}>
                 <View style={styles.detailContainer}>
-              
-                  <Text style={styles.label}>{expenseDetails.name}</Text>
-                  
+                  <Text style={styles.label}>Name:</Text>
+                  <Text style={styles.text}>{expenseDetails.name}</Text>
                 </View>
                 <View style={styles.detailContainer}>
-                <Text style={styles.label}>~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ </Text>
-                <Text style={styles.text}></Text>
-                  <Text style={styles.label}>Amount:    {expenseDetails.amount} €</Text>
-                  <Text style={styles.text}></Text>
-
-                  <Text style={styles.label}>Paid By:   {expenseDetails.paidBy}</Text>
-   
+                  <Text style={styles.label}>Amount:</Text>
+                  <Text style={styles.text}>{expenseDetails.amount}</Text>
+                </View>
+                <View style={styles.detailContainer}>
+                  <Text style={styles.label}>Paid By:</Text>
+                  <Text style={styles.text}>{expenseDetails.paidBy}</Text>
                 </View>
               </View>
             </Animated.View>
@@ -160,12 +166,11 @@ const styles = StyleSheet.create({
   },
   detailContainer: {
     marginBottom: 15,
-    //alignItems: 'center',
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2471A3',
+    color: '#007bff',
   },
   text: {
     fontSize: 18,
@@ -183,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: '#2471A3',
+    borderColor: '#007bff',
     marginBottom: 5,
   },
   oweItemText: {
@@ -212,7 +217,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: 20,
+    paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight-500 : -50,
   },
   errorText: {
     color: 'red',
@@ -222,11 +227,6 @@ const styles = StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',
-  },
-  payBackButton:{
-    justifyContent: 'center',
-    flexDirection: 'row',
-
   },
 });
 

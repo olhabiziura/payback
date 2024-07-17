@@ -20,18 +20,15 @@ const AboutScreen = ({ navigation }) => {
       
       <View style={styles.container_main}>
         <Image
-          source={require('/Users/ezgi/payback.last/assets/images/welcome_mascot_transparent.png')}
+          source={require('../assets/images/mascot.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>About Our App</Text>
         <Text style={styles.description}>
-          Welcome to our app, the perfect solution for sharing expenses with friends!
+          Our app is designed to provide the best user experience for managing your tasks efficiently. 
+          We aim to bring you the latest features and updates regularly.
         </Text>
-        <Text style={styles.description}>
-        Our app makes it easy to divide costs, track spending, and settle up quickly and fairly. Whether you're splitting rent with roommates, sharing vacation costs, or managing group gifts, our intuitive platform ensures everyone pays their fair share.
-        </Text>
-        <Text style={styles.description}>
-        With features like real-time updates, expense tracking, and easy-to-use payment options, managing group expenses has never been simpler. Join us and experience hassle-free expense sharing with your friends!        </Text>
+
         <Text style={styles.subtitle}>Follow Us</Text>
         <View style={styles.socialButtons}>
           <Icon.Button

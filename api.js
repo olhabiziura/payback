@@ -4,16 +4,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const api = axios.create({
 
   baseURL: //'http://192.168.0.110:8000'
-  //'http://192.168.1.235:8000'
-  //'http://192.168.1.77:8000/',
-  //'http://10.37.224.202:8000'
-  //'http://192.168.1.227:8000'
- //'http://172.20.10.4:8000'
- //'http://192.168.48:8000'
  'http://192.168.1.196:8000'
-  
-    // Replace with your local IP address
-});
+  });
 
 api.interceptors.request.use(
   async config => {
@@ -49,24 +41,18 @@ const refreshAccessToken = async () => {
   try {
     const refreshToken = await AsyncStorage.getItem('refreshToken');
     if (!refreshToken) {
-      console.log('No  found');
-      return;
+      throw new Error('Refresh token not found');
     }
-    console.log("enter refresh token")
-    const response = await api.post('/api/token/refresh/', { refreshToken });
-    const newToken = response.data.accessToken;
-    const newRefreshToken = response.data.refreshToken;
-    console.log ("refresh response received ")
-    // Save new tokens in AsyncStorage
+    const response = await axios.post(
+      'https://your-api-base-url.com/api/token/refresh/',
+      { refresh: refreshToken }
+    );
+    const newToken = response.data.access;
     await AsyncStorage.setItem('token', newToken);
-    await AsyncStorage.setItem('refreshToken', newRefreshToken);
-
-    // Set the new token in state
-    setToken(newToken);
-
-    console.log('Token refreshed successfully');
+    return newToken;
   } catch (error) {
-    console.error('Error refreshing token:', error);
+    throw error;
   }
 };
+
 export default api;

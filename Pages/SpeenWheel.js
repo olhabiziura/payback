@@ -1,11 +1,13 @@
+// SpinWheelGame.js
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, Animated, Easing, TextInput, FlatList, StyleSheet, TouchableOpacity, Dimensions, Platform , StatusBar} from 'react-native';
+import { View, Text, Button, Animated, Easing, TextInput, FlatList, StyleSheet, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Circle, G, Line, Text as SVGText, Svg } from 'react-native-svg';
 import HeaderBar from '../components/HeaderBar';
 import ChosenNamePopup from '../components/ChosenNamePopUp';
-
 const screenHeight = Dimensions.get('window').height;
+const maxBarHeight = screenHeight / 3.75;
 
 const SpinWheel = ({ names, onSpinEnd }) => {
   const [spinning, setSpinning] = useState(false);
@@ -50,15 +52,14 @@ const SpinWheel = ({ names, onSpinEnd }) => {
                 const endAngle = ((index + 1) * 360) / names.length;
                 return (
                   <G key={index}>
-                    <Circle cx="150" cy="150" r="100" fill="none" stroke="#2471A3" strokeWidth="1" />
+                    <Circle cx="150" cy="150" r="100" fill="none" stroke="black" strokeWidth="1" />
                     <G transform={`rotate(${startAngle + 90} 150 150)`}>
-                      <Line x1="150" y1="50" x2="150" y2="100" stroke="#2471A3" strokeWidth="2" />
+                      <Line x1="150" y1="50" x2="150" y2="100" stroke="black" strokeWidth="2" />
                       <SVGText
                         x="150"
                         y="90"
                         fontSize="12"
                         textAnchor="middle"
-                        fill="#2471A3"
                         transform={`rotate(${(endAngle - startAngle) / 2} 150 150)`}>
                         {name}
                       </SVGText>
@@ -67,16 +68,16 @@ const SpinWheel = ({ names, onSpinEnd }) => {
                 );
               })
             ) : (
-              <Circle cx="150" cy="150" r="100" fill="none" stroke="#2471A3" strokeWidth="1" />
+              <Circle cx="150" cy="150" r="100" fill="none" stroke="black" strokeWidth="1" />
             )}
           </Svg>
         </Animated.View>
       </View>
       <View style={styles.indicator}>
-        <Line x1="150" y1="0" x2="150" y2="50" stroke="#2471A3" strokeWidth="4" />
-        <Line x1="145" y1="40" x2="155" y2="40" stroke="#2471A3" strokeWidth="4" />
+        <Line x1="150" y1="0" x2="150" y2="50" stroke="black" strokeWidth="4" />
+        <Line x1="145" y1="40" x2="155" y2="40" stroke="black" strokeWidth="4" />
       </View>
-      <Button title="Spin" onPress={spinWheel} disabled={spinning || names.length === 0} color="#2471A3" />
+      <Button title="Spin" onPress={spinWheel} disabled={spinning || names.length === 0} />
       {spinning && <Text style={styles.spinningText}>Spinning...</Text>}
     </View>
   );
@@ -117,11 +118,8 @@ const SpinWheelGame = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} title={'Roulette'} />
+      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
       <View style={styles.container}>
-        <Text style={styles.description}>
-          Welcome to the Roulette of Destiny! Enter the names of your friends and spin the wheel to determine who will be chosen to cover the expense. Add names below and start playing!
-        </Text>
         <TextInput
           style={styles.input}
           placeholder="Enter a name"
@@ -129,7 +127,7 @@ const SpinWheelGame = ({ navigation }) => {
           onChangeText={setNewName}
           onSubmitEditing={addName} // Add this line
         />
-        <Button title="Add Name" onPress={addName} color="#2471A3" />
+        <Button title="Add Name" onPress={addName} />
         <FlatList
           data={names}
           renderItem={({ item }) => (
@@ -181,45 +179,44 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     alignItems: 'center',
   },
-  description: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    margin: 0,
-    textAlign: 'center',
+  containerwheel: {
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginVertical: 20,
   },
   input: {
     height: 40,
-    borderColor: '#2471A3',
+    borderColor: 'gray',
     borderWidth: 1,
-    marginVertical: 10,
+    margin: 20,
     paddingHorizontal: 10,
-    width: '100%',
-    borderRadius: 5,
+    width: 200,
   },
   nameItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#2471A3',
+    borderColor: '#ccc',
     borderRadius: 5,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    padding: 10,
   },
   nameItem: {
-    flex: 1,
+    padding: 5,
     fontSize: 18,
-    color: '#2471A3',
   },
   deleteButton: {
-    backgroundColor: '#ff5733',
+    backgroundColor: 'red',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 5,
-    marginLeft: 10,
+    marginLeft: 'auto',
   },
   deleteButtonText: {
     color: 'white',
@@ -227,21 +224,21 @@ const styles = StyleSheet.create({
   },
   spinWheelContainer: {
     alignItems: 'center',
-    marginVertical: 0,
+    marginVertical: 20,
   },
   spinWheelFrame: {
     borderWidth: 3,
-    borderColor: '#2471A3',
+    borderColor: '#d3d3d3',
     padding: 10,
     borderRadius: 10,
     backgroundColor: '#fff',
     marginVertical: 20,
+    width: '95%',
+    alignItems: 'center',
   },
   indicator: {
     position: 'absolute',
-    top: 10,
-    alignItems: 'center',
-    width: '100%',
+    top: 0,
   },
   spinningText: {
     marginTop: 10,
@@ -250,7 +247,7 @@ const styles = StyleSheet.create({
     color: '#ff5733',
   },
   clearButton: {
-    backgroundColor: '#2471A3',
+    backgroundColor: '#f0f0f0',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -259,12 +256,8 @@ const styles = StyleSheet.create({
   clearButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
-  },
-  listContainer: {
-    width: '100%',
-    marginBottom: 20,
+    color: '#333',
   },
 });
 
-export default SpinWheelGame
+export default SpinWheelGame;

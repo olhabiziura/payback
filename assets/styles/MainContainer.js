@@ -157,6 +157,12 @@ const styles = StyleSheet.create({
       marginLeft: 8,
       
     },
+    rightActions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      flex: 1,
+    },
     buttonContainer: {
       marginTop: 20, // Adjust the margin top to lower the buttons
     },
@@ -182,27 +188,6 @@ const styles = StyleSheet.create({
       backgroundColor: '#F4F4F4',
       paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
     },
-    
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
-    centeredTitle: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    rightActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-
 
   });
 export default styles;

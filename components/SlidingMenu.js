@@ -68,11 +68,11 @@ const styles = StyleSheet.create({
     modalBackground: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     container: {
         width: '100%',
-        height: '70%',
+        height: '80%',
         backgroundColor: 'white',
         padding: 20,
         shadowColor: '#000',

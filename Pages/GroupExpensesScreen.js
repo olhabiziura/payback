@@ -121,10 +121,12 @@ const GroupExpensesScreen = () => {
   const filteredGroups = sortedGroups.filter(group => {
     return group.name.toLowerCase().includes(searchQuery.toLowerCase()); // Filter based on search query
   });
+  
+
 
   return (
     <View style={styles.container}>
-      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} notifications= {true} title={'Groups'} />
+      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} title={'Groups'} />
       <View style={styles.topBar}>
         <View style={styles.searchContainer}>
           <TextInput
@@ -220,16 +222,16 @@ const GroupExpensesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: '#F4F4F4',
   },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: '#ccc',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   iconButton: {
@@ -245,10 +247,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: '#ccc',
     borderRadius: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
   },
   scrollView: {
     flex: 1,
@@ -258,25 +260,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 15,
+    paddingVertical: 20,
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 20,
     borderRadius: 15,
-    backgroundColor: '#FFF',
-    elevation: 1,
+    backgroundColor: '#e7e7e7',
+    elevation: 2,
     marginHorizontal: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
   },
   selectedGroup: {
-    backgroundColor: '#F0F0F0',
+    backgroundColor: '#d1e7dd',
   },
   groupName: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
   },
   fabButton: {
@@ -300,8 +298,8 @@ const styles = StyleSheet.create({
   deleteButton: {
     paddingVertical: 10,
     paddingHorizontal: 25,
-    backgroundColor: '#FF3B30',
-    borderRadius: 10,
+    backgroundColor: 'red',
+    borderRadius: 15,
   },
   modalContainer: {
     flex: 1,
@@ -311,28 +309,23 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '80%',
-    backgroundColor: '#FFF',
+    backgroundColor: '#fff',
     padding: 20,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    elevation: 5,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: '#ccc',
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
     height: 40,
-    backgroundColor: '#FFF',
   },
   modalButtons: {
     flexDirection: 'row',
@@ -345,14 +338,14 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   cancelButton: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: '#ccc',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: 'black',
   },
   buttonText: {
-    color: '#FFF',
-    fontWeight: '600',
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

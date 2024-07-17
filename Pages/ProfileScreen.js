@@ -7,10 +7,8 @@ import api from '../api';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Feather } from '@expo/vector-icons';
 import styles from '../assets/styles/MainContainer';
-import { registerIndieID, unregisterIndieDevice } from 'native-notify';
 
 const ProfileScreen = ({ navigation, route, requester_id }) => {
-  const [username, setUsername] = useState('');
   const [name, setName] = useState('John');
   const [surname, setSurname] = useState('Doe');
   const [paymentDetails, setPaymentDetails] = useState('IBAN: 123456789');
@@ -45,11 +43,10 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       const response = await api.get(`/api/user-profile/${userId}/`);
       const profileData = response.data;
       setProfilePicture(profileData.profile_picture);
-      setName(profileData.user.first_name);
-      setUsername(profileData.user.username);
-      setSurname(profileData.user.last_name);
+      setName(profileData.name);
+      setSurname(profileData.surname);
       setPaymentDetails(profileData.iban);
-      setEmail(profileData.user.email);
+      setEmail(profileData.email);
       setFriends(profileData.friends);
       setAmountOwed(profileData.amountOwed);
       setAmountOwedToYou(profileData.amountOwedToYou);
@@ -112,15 +109,7 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       console.error('Error:', error);
     }
   };
-  const handleLogout = () => {
-    // Native Notify Indie Push Registration Code
-    console.log(username, "there should be the username")
-    unregisterIndieDevice(username, 22505, '8ycZITuSYpxybSMqD8gWSb');
-    // End of Native Notify Code
-    // Implement your logout logic here
-    // For example, clear authentication tokens, navigate to the login screen, etc.
-    navigation.navigate('Log In'); // Assuming 'Login' is the name of your login screen
-  };
+
   const handleCancelEditing = () => {
     setImage(originalImage);
     setIsEditable(false);
@@ -157,11 +146,9 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
         home={true}
         bars={true}
         question={true}
-        notifications= {true}
-        title={'Profile'}
       />
       <View style={stylesprofile.container_main}>
-        <ScrollView contentContainerStyle={stylesprofile.container}>
+        <ScrollView contentContainerStyle={stylesprofile.container_main}>
          {/*<Text style={styles.title}>Profile</Text>*/}
           <View style={stylesprofile.img}>
             {image && <Image source={{ uri: image }} style={stylesprofile.tempprofilepic} />}
@@ -233,13 +220,6 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
               <Text style={stylesprofile.amountText}>{name} owes you: {amountOwedToYou}</Text>
             </View>
           )}
-          {authenticatedUserId === user_id && (
-            <View style={stylesprofile.logoutContainer}>
-              <TouchableOpacity style={stylesprofile.logoutButton} onPress={handleLogout}>
-                <Text style={stylesprofile.logoutButtonText}>Logout</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -247,15 +227,6 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
 };
 
 const stylesprofile = StyleSheet.create({
-  container :{
-      flexGrow: 1,
-      height : 'auto',
-      justifyContent: 'center',
-      paddingHorizontal: 0,
-      padding: 16,
-      backgroundColor : '#F4F4F4',
-      marginLeft: '5%',
-    },
   expenseItem: {
     padding: 10,
     borderBottomColor: '#ccc',
@@ -345,29 +316,6 @@ const stylesprofile = StyleSheet.create({
     alignItems: 'center',
     paddingRight: 10,
   },
-
-  logoutContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    paddingRight: 20,
-  },
-  logoutButton: {
-    backgroundColor: '#007AFF',
-    padding: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginVertical: 20,
-    width: '50%',
-  },
-  logoutButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-
-
 });
-
 
 export default ProfileScreen;

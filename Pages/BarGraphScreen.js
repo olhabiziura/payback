@@ -69,7 +69,7 @@ const BarGraphScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBar style={styles.header_container} navigation={navigation} goBack={false} person={true} home={false} bars={true} question={true} notifications= {true} title={'Total Balance'} />
+      <HeaderBar style={styles.header_container} navigation={navigation} goBack={false} person={true} home={true} bars={true} question={true} title={'Total Balance'} />
     
       <View style={styles.containerMain}>
       <Text style={styles.text}>Welcome To Payback!</Text>

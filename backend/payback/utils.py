@@ -20,7 +20,7 @@ def another():
         expenses = Expense.objects.all()
         for expense in expenses: 
             owes = Owes.objects.filter(expense=expense)
-    
+            
             for owe in owes:
                 member = owe.member
                 membership = Membership.objects.filter(id=owe.member_id).first()

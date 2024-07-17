@@ -14,10 +14,8 @@ const handleLogIn = async (navigation, username, password, isAuthenticated, setI
     });
 
     const { access, refresh } = response.data;
-      // Native Notify Indie Push Registration Code
-      console.log(username)
-      registerIndieID(username, 22505, '8ycZITuSYpxybSMqD8gWSb');
-      // End of Native Notify Cod
+    console.log(username)
+    registerIndieID(username, 22505, '8ycZITuSYpxybSMqD8gWSb');
     console.log('Login successful, received tokens:', { access, refresh });
 
     // Store tokens

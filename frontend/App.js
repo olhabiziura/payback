@@ -30,7 +30,7 @@ import ReceiptScanGroup from './Pages/ReceiptScanGroup';
 import ReceiptScanAddGroup from './Pages/ReceiptScanAddGroup';
 import ReceiptScanAddExpense from './Pages/ReceiptScanAddExpenses';
 
-import * as Notifications from "expo-notifications";
+  import * as Notifications from "expo-notifications";
 import moment from 'moment';
 import api from './api';
 import { registerForPushNotificationsAsync, fetchExpensesAndScheduleNotifications } from './NotificationService';

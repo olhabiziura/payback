@@ -4,8 +4,7 @@ import api from '../../api';
 import React from 'react';
 import handleLogIn from './handleLogIn';
 import {  registerForPushNotificationsAsync,fetchExpensesAndScheduleNotifications } from '../../NotificationService';
-import { registerIndieID, unregisterIndieDevice } from 'native-notify';
-import axios from 'axios';
+
 const handleSignUp = async (navigation, username, email, password, repeatPassword, isAuthenticated, setIsAuthenticated) => {
   if (password === repeatPassword && password !== '') {
     try {

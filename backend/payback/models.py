@@ -65,6 +65,7 @@ class Owes(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     date = models.DateTimeField(default=timezone.now())
+    last_notification_date = models.DateTimeField(default=timezone.now()) 
     def __str__(self):
         return f"Owes: {self.expense} - {self.member}"
     

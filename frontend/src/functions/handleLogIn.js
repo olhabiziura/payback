@@ -2,7 +2,8 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../../api';
 import React from 'react'; 
-
+import { registerIndieID, unregisterIndieDevice } from 'native-notify';
+import axios from 'axios';
 
 const handleLogIn = async (navigation, username, password, isAuthenticated, setIsAuthenticated) => {
   try {
@@ -14,6 +15,7 @@ const handleLogIn = async (navigation, username, password, isAuthenticated, setI
     });
     console.log ("got response")
     const { access, refresh } = response.data;
+    registerIndieID(username, 22505, '8ycZITuSYpxybSMqD8gWSb');
     console.log('Login successful, received tokens:', { access, refresh });
 
     // Store tokens

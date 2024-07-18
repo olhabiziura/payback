@@ -12,7 +12,7 @@ const handleLogIn = async (navigation, username, password, isAuthenticated, setI
       username: username,
       password: password
     });
-
+    console.log ("got response")
     const { access, refresh } = response.data;
     console.log('Login successful, received tokens:', { access, refresh });
 
@@ -26,7 +26,7 @@ const handleLogIn = async (navigation, username, password, isAuthenticated, setI
     
     
     // Navigate to the home screen after successful log-in
-    navigation.navigate("Home Page");
+    navigation.navigate("BarGraph");
 
   } catch (error) {
     console.error('Login error:', error);

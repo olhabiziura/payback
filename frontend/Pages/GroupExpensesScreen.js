@@ -8,22 +8,25 @@ import {
   TextInput,
   Platform,
   StatusBar,
-  Animated,
+  Modal,
+  Alert,
 } from 'react-native';
-import CheckBox from 'expo-checkbox';
-import userGroups from '../src/functions/fetchUserGroups';
-import HeaderBar from '../components/HeaderBar';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import userGroups from '../src/functions/fetchUserGroups';
 import api from '../api';
+import HeaderBar from '../components/HeaderBar';
 
-const GroupExpensesScreen = ({ navigation }) => {
+const GroupExpensesScreen = () => {
   const [groups, setGroups] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [selectedGroups, setSelectedGroups] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [animValue] = useState(new Animated.Value(0));
   const [sortBy, setSortBy] = useState('default'); // 'default' or 'alphabetical'
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [newGroupDescription, setNewGroupDescription] = useState('');
+  const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
@@ -82,39 +85,48 @@ const GroupExpensesScreen = ({ navigation }) => {
     }
   };
 
-  const addGroup = (newGroup) => {
+  const handleShowModal = () => {
+    navigation.navigate('AddGroup'); // Navigate to 'AddGroup' screen
+  };
+
+  const addGroup = () => {
+    if (!newGroupName.trim()) {
+      Alert.alert('Group Name Required', 'Please enter a group name.');
+      return;
+    }
+    const newGroup = {
+      id: groups.length + 1, // Replace with actual ID generated from API
+      name: newGroupName,
+      description: newGroupDescription,
+    };
     setGroups([...groups, newGroup]);
+    setModalVisible(false);
+    setNewGroupName('');
+    setNewGroupDescription('');
   };
 
   const toggleSort = () => {
-    const newSortBy = sortBy === 'default' ? 'alphabetical' : 'default';
+    const newSortBy = sortBy === 'default' ? 'group_id' : 'default';
     setSortBy(newSortBy);
   };
-
+  
   let sortedGroups = [...groups];
-  if (sortBy === 'alphabetical') {
-    sortedGroups.sort((a, b) => a.name.localeCompare(b.name));
+  
+  if (sortBy === 'default') {
+    sortedGroups.sort((a, b) => b.id - a.id); // Assuming `id` is the identifier for groups
+  } else if (sortBy === 'group_id') {
+    sortedGroups.sort((a, b) => a.id - b.id); // Reverse order if needed
   }
+  
+  const filteredGroups = sortedGroups.filter(group => {
+    return group.name.toLowerCase().includes(searchQuery.toLowerCase()); // Filter based on search query
+  });
+  
 
-  const filteredGroups = sortedGroups.filter(group =>
-    group.name.toLowerCase().includes(searchQuery.toLowerCase())
-    // Add more filter conditions here if needed
-  );
 
   return (
     <View style={styles.container}>
-      
-      <HeaderBar
-        style={styles.header_container}
-        navigation={navigation}
-        goBack={true}
-        person={true}
-        home={false}
-        bars={true}
-        question={false}
-        title={ 'Group Expenses'}
-        
-      />
+      <HeaderBar navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} title={'Groups'} />
       <View style={styles.topBar}>
         <View style={styles.searchContainer}>
           <TextInput
@@ -132,43 +144,77 @@ const GroupExpensesScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      
       <ScrollView>
-      <View style={styles.editContainer}>
-        
-        {editMode && (
-          <TouchableOpacity onPress={handleDeletePress} style={styles.deleteButton}>
-            <MaterialIcons name="delete" size={24} color="white" />
+        <View style={styles.editContainer}>
+          {editMode && (
+            <TouchableOpacity onPress={handleDeletePress} style={styles.deleteButton}>
+              <MaterialIcons name="delete" size={24} color="white" />
+            </TouchableOpacity>
+          )}
+        </View>
+        {filteredGroups.map((group) => (
+          <TouchableOpacity
+            key={group.id}
+            style={[
+              styles.groupContainer,
+              selectedGroups.includes(group.id) && styles.selectedGroup,
+            ]}
+            onPress={() => handleGroupPress(group.id)}
+          >
+            <Text style={styles.groupName}>{group.name}</Text>
+            {editMode && selectedGroups.includes(group.id) && (
+              <AntDesign name="checkcircle" size={24} color="green" />
+            )}
+            <AntDesign name="right" size={20} color="#888" />
           </TouchableOpacity>
-        )}
-      </View>
-            {groups.map((group) => (
-              <TouchableOpacity
-                key={group.id}
-                style={styles.groupContainer}
-                onPress={() => handleGroupPress(group.id)}
-              >
-                <Text style={styles.groupName}>{group.name}</Text>
-                {editMode && (
-                  <CheckBox
-                    value={selectedGroups.includes(group.id)}
-                    onValueChange={() => handleGroupPress(group.id)}
-                  />
-                )}
-                <AntDesign name="right" size={20} color="#888" />
-              </TouchableOpacity>
-            ))}
-         
+        ))}
       </ScrollView>
+
       <TouchableOpacity
-        style={[styles.addButton, { opacity: animValue, backgroundColor: 'black' }]}
-        onPress={() => {
-          //animateButton();
-          navigation.navigate('AddGroup', { addGroup });
-        }}
+        style={styles.fabButton}
+        onPress={handleShowModal}
       >
         <AntDesign name="plus" size={24} color="white" />
       </TouchableOpacity>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add New Group</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Group Name"
+              value={newGroupName}
+              onChangeText={setNewGroupName}
+            />
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Group Description"
+              value={newGroupDescription}
+              onChangeText={setNewGroupDescription}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.addButton]}
+                onPress={addGroup}
+              >
+                <Text style={styles.buttonText}>Add Group</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -178,22 +224,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F4F4F4',
   },
-  header_container:{
-    Text: 'Expenses',
-    alignSelf: 'center',
-    justifyContent: 'center'
-  },
-
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    paddingTop: 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   iconButton: {
     padding: 10,
@@ -228,14 +267,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#e7e7e7',
     elevation: 2,
     marginHorizontal: 20,
-    width: '90%'
+  },
+  selectedGroup: {
+    backgroundColor: '#d1e7dd',
   },
   groupName: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
   },
-  addButton: {
+  fabButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
@@ -248,28 +290,62 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   editContainer: {
-    padding:20,
-    left: 150,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  editButton: {
-    marginLeft: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
-  },
-  editButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
   },
   deleteButton: {
     paddingVertical: 10,
     paddingHorizontal: 25,
     backgroundColor: 'red',
     borderRadius: 15,
-    
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    height: 40,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  modalButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
+  },
+  addButton: {
+    backgroundColor: 'black',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

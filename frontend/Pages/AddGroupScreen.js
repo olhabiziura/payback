@@ -62,9 +62,8 @@ const AddGroupScreen = ({ navigation }) => {
 
   return (
     <View style = {styles.safeArea}>
-    <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
 
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.label}>Enter Group Name:</Text>
       <TextInput
         style={styles.input}
@@ -112,7 +111,7 @@ const AddGroupScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.addButton} onPress={handleAddGroup}>
         <Text style={styles.addButtonText}>Add Group</Text>
       </TouchableOpacity>
-    </ScrollView>
+    </View>
     </View>
   );
 };
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   addButton: {
-    marginTop: 20,
+    marginBottom: '40%',
     padding: 10,
     backgroundColor: 'blue',
     alignItems: 'center',
@@ -168,9 +167,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   safeArea: {
+    paddingTop: 80,
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight-50 : 0,
+   
   },
   header_container:{
     

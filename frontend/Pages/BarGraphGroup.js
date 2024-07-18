@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
 import api from '../api';
 import { Platform, StatusBar } from "react-native";
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const screenHeight = Dimensions.get('window').height;
@@ -16,7 +17,7 @@ const BarGraphGroup = ({ navigation, route }) => {
   const [data, setData] = useState([]);
   const screenWidth = Dimensions.get('window').width;
   const screenHeight = Dimensions.get('window').height;
-  const barWidth = 40; // Adjust the width of each bar as needed
+  const [barWidth, setBarWidth ] =  useState(40); // Adjust the width of each bar as needed
   const maxBarHeight = screenHeight / 3; // Max height of bars
 
   useEffect(() => {
@@ -35,6 +36,9 @@ const BarGraphGroup = ({ navigation, route }) => {
           label: item.name, // Change 'name' to 'label' for better understanding
           value: parseFloat(item.amount), // Ensure value is a number
         }));
+        const maxLabelLength = Math.max(...transformedData.map(item => item.label.length));
+        setBarWidth(maxLabelLength * 10); // Adjust multiplier as needed for spacing
+
         console.log(transformedData)
         setData(transformedData);
       } catch (error) {
@@ -46,62 +50,84 @@ const BarGraphGroup = ({ navigation, route }) => {
   }, []);
 
 
-  
+  const handleBarPress = (amount) => {
+    
+    navigation.navigate('Payment Page');
+
+  };
+
   if (data.length === 0) {
     return <Text>Loading...</Text>;
   }
 
   // Find the maximum absolute value to scale the bars
   const maxValue = Math.max(...data.map(item => Math.abs(item.value)));
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.containerMain}>
-          <Text style={styles.title}>Bar Graph for {groupName}</Text>
-          <ScrollView horizontal>
+    
+      <View style={styles.containerMain}>
+      <Text style={styles.title}>"{groupName}"</Text>
+
+      <Text style={styles.subtitle}>Tap on the bar to reimburse instantly!</Text>
+
+
+
+        <View style={styles.graphFrame}>
+          <ScrollView horizontal contentContainerStyle={styles.horizontalScroll}>
             <View style={styles.graphContainer}>
-              {/* Draw zero line */}
               <View style={styles.zeroLine} />
               {data
-                .filter(item => item.value !== 0) // Filter out items with value 0
+                .filter(item => item.value !== 0)
                 .map((item, index) => {
-                  const barHeight = (Math.abs(item.value) / maxValue) * maxBarHeight;
+                  let barHeight = (Math.abs(item.value) / maxValue) * maxBarHeight;
+                  if (barHeight <= 50) {
+                    barHeight = 50;
+                  }
                   return (
+                    <TouchableOpacity onPress={() => handleBarPress(item.value)} >
                     <View key={index} style={styles.barContainer}>
-                      <Text style={[styles.value, item.value >= 0 ? styles.positiveValue : styles.negativeValue]}>
-                        {item.value}
-                      </Text>
                       <View
                         style={[
                           styles.bar,
                           {
-                            backgroundColor: item.value >= 0 ? 'blue' : 'red',
+                            backgroundColor: item.value >= 0 ? '#2471A3' : '#ff5733',
                             height: barHeight,
                             marginTop: item.value >= 0 ? maxBarHeight - barHeight : maxBarHeight,
                             marginBottom: item.value < 0 ? maxBarHeight - barHeight : maxBarHeight,
                           },
                         ]}
-                      />
-                      <Text style={[styles.label, item.value >= 0 ? styles.positiveLabel : styles.negativeLabel]}>
-                        {item.label}
-                      </Text>
+                      >
+                      
+                      <View>
+
+                        <Text style={styles.value}>{item.value}</Text>
+                        <Text style={styles.label}>{item.label}</Text>
+                      </View>
+                      </View>
+
+                      
                     </View>
+                    </TouchableOpacity>
+                    
                   );
                 })}
+                
             </View>
           </ScrollView>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+    paddingTop: 0,
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -113,53 +139,113 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 10,
+    flex: 1,
   },
   title: {
-    marginBottom: 40,
+    marginBottom: 0,
     fontSize: 24,
     fontWeight: 'bold',
+    marginVertical: 5,
+    color: '#2471A3',
+  },
+  subtitle: {
+    marginBottom: 0,
+    fontSize: 18,
+    fontWeight: 'bold',
     marginVertical: 10,
+    color: '#2471A3',
+  },
+  textContainer: {
+    borderWidth: 2,
+    width: '95%',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    borderColor: '#d3d3d3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
     
+  },
+  graphFrame: {
+    borderWidth: 2,
+    borderColor: '#d3d3d3',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    marginVertical: 20,
+    width: '95%',
+    alignItems: 'center',
+    flex: 1,
+  },
+  horizontalScroll: {
+    alignItems: 'center',
   },
   graphContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
     position: 'relative',
   },
   barContainer: {
     marginRight: 5,
     alignItems: 'center',
-    marginBottom: 65,
   },
   bar: {
     width: 70,
+    justifyContent: 'flex-end',
+    borderRadius: 10,
   },
   label: {
     textAlign: 'center',
-  },
-  positiveLabel: {
-    marginTop: 5,
-  },
-  negativeLabel: {
-    marginBottom: 5,
+    color: 'white',
+    marginTop: 0,
   },
   value: {
     textAlign: 'center',
-  },
-  positiveValue: {
-    marginBottom: 5,
-  },
-  negativeValue: {
-    marginTop: 5,
+    color: 'white',
+    padding: 0,
+  
   },
   zeroLine: {
     position: 'absolute',
-    top: maxBarHeight + 21,
+    top: maxBarHeight ,
     left: 0,
     right: 0,
     height: 1,
     backgroundColor: 'black',
+  },
+  image: {
+    width: 150,
+    height: 150,
+  },
+  button: {
+    width: 280,
+    paddingVertical: 15,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+    marginVertical: 15,
+    backgroundColor: '#e7e7e7',
+    alignSelf: "center",
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    marginRight: 10,
+  },
+  buttonText: {
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  loader: {
+    marginTop: 20,
   },
 });
 

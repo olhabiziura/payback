@@ -188,6 +188,15 @@ const styles = StyleSheet.create({
       backgroundColor: '#F4F4F4',
       paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
     },
+    
+    headerTitle: {
+      fontSize: 20,
+      textAlign: 'auto',
+      marginTop: 20,
+      fontWeight: 'bold',
+      color: '#000',
+    },
+
 
   });
 export default styles;

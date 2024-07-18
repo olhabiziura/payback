@@ -43,10 +43,10 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
       const response = await api.get(`/api/user-profile/${userId}/`);
       const profileData = response.data;
       setProfilePicture(profileData.profile_picture);
-      setName(profileData.name);
-      setSurname(profileData.surname);
+      setName(profileData.user.first_name);
+      setSurname(profileData.user.last_name);
       setPaymentDetails(profileData.iban);
-      setEmail(profileData.email);
+      setEmail(profileData.user.email);
       setFriends(profileData.friends);
       setAmountOwed(profileData.amountOwed);
       setAmountOwedToYou(profileData.amountOwedToYou);
@@ -148,7 +148,7 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
         question={true}
       />
       <View style={stylesprofile.container_main}>
-        <ScrollView contentContainerStyle={stylesprofile.container_main}>
+        <ScrollView contentContainerStyle={stylesprofile.container}>
          {/*<Text style={styles.title}>Profile</Text>*/}
           <View style={stylesprofile.img}>
             {image && <Image source={{ uri: image }} style={stylesprofile.tempprofilepic} />}
@@ -227,6 +227,15 @@ const ProfileScreen = ({ navigation, route, requester_id }) => {
 };
 
 const stylesprofile = StyleSheet.create({
+  container :{
+      flexGrow: 1,
+      height : 'auto',
+      justifyContent: 'center',
+      paddingHorizontal: 0,
+      padding: 16,
+      backgroundColor : '#F4F4F4',
+      marginLeft: '5%',
+    },
   expenseItem: {
     padding: 10,
     borderBottomColor: '#ccc',

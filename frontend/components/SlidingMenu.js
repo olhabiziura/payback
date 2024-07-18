@@ -1,65 +1,78 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, { useAnimatedGestureHandler, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 
-const { width } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const SlidingMenu = ({ navigation, isVisible, onClose }) => {
-    const translateX = useSharedValue(width);
+    const translateY = useSharedValue(height);
 
     const gestureHandler = useAnimatedGestureHandler({
         onActive: (event) => {
-            translateX.value = event.translationX;
+            translateY.value = event.translationY + height * 0.3;
         },
         onEnd: (event) => {
-            if (event.translationX > -width / 2) {
-                translateX.value = withSpring(width);
+            if (event.translationY > height * 0.15) {
+                translateY.value = withSpring(height, {}, () => {
+                    onClose();
+                });
             } else {
-                translateX.value = withSpring(0);
+                translateY.value = withSpring(height * 0.3);
             }
         },
     });
 
     useEffect(() => {
         if (isVisible) {
-            translateX.value = withSpring(0);
+            translateY.value = withSpring(height * 0.3);
         } else {
-            translateX.value = withSpring(width);
+            translateY.value = withSpring(height);
         }
     }, [isVisible]);
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
-            transform: [{ translateX: translateX.value }],
+            transform: [{ translateY: translateY.value }],
         };
     });
 
     return (
-        <PanGestureHandler onGestureEvent={gestureHandler}>
-            <Animated.View style={[styles.container, animatedStyle, { zIndex: isVisible ? 1 : -1 }]}>
-                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('SpinWheel')} >
-                <Text style={styles.menuText}>Roulette</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('Receipt Scan')} >
-                <Text style={styles.menuText}>Receipt Scanner</Text>
-                </TouchableOpacity>
-                <Text style={styles.menuText}>Some other random game</Text>
-            </Animated.View>
-        </PanGestureHandler>
+        <Modal visible={isVisible} transparent animationType="slide">
+            <TouchableWithoutFeedback onPress={onClose}>
+                <View style={styles.modalBackground}>
+                    <PanGestureHandler onGestureEvent={gestureHandler}>
+                        <Animated.View style={[styles.container, animatedStyle]}>
+                            <TouchableWithoutFeedback>
+                                <View>
+                                    <TouchableOpacity onPress={() => navigation.navigate('SpinWheel')}>
+                                        <Text style={styles.menuText}>Roulette</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Receipt Scan')}>
+                                        <Text style={styles.menuText}>Receipt Scanner</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => navigation.navigate('Payment Page')}>
+                                        <Text style={styles.menuText}>Pay Now</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </Animated.View>
+                    </PanGestureHandler>
+                </View>
+            </TouchableWithoutFeedback>
+        </Modal>
     );
 };
 
 const styles = StyleSheet.create({
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
     container: {
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: '70%',
-        height: '100%',
+        width: '100%',
+        height: '70%',
         backgroundColor: 'white',
         padding: 20,
         shadowColor: '#000',
@@ -67,15 +80,8 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.8,
         shadowRadius: 2,
         elevation: 5,
-    },
-    closeButton: {
-        alignSelf: 'flex-end',
-        marginBottom: 20,
-        marginTop: 40,
-    },
-    closeButtonText: {
-        fontSize: 18,
-        color: 'black',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
     menuText: {
         fontSize: 20,
@@ -84,4 +90,3 @@ const styles = StyleSheet.create({
 });
 
 export default SlidingMenu;
-

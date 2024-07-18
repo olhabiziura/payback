@@ -9,6 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 
+
+//<Button title={isEditing ? "Done" : "Edit"} onPress={toggleEditing} />
+
 const GroupDetailsPage = ({ route }) => {
   const { groupId } = route.params;
   const [groupData, setGroupData] = useState(null);
@@ -65,23 +68,19 @@ const GroupDetailsPage = ({ route }) => {
   return (
     <SafeAreaView style = {styles.safeArea}>
     <HeaderBar style = {styles.header_container} navigation={navigation} goBack = {true} person = {true} home = {true} bars ={true} question = {true}/>
-
+    
     <View style={styles.container}>
+      
       {groupData ? (
         <>
           <View style={styles.header}>
             <Text style={styles.title}>{groupData.name}</Text>
-            <Button title={isEditing ? "Done" : "Edit"} onPress={toggleEditing} />
+            
           </View>
-          <Text style={styles.text}>Group ID: {groupId}</Text>
+          
           {isEditing ? (
             <>
-              <TextInput
-                style={styles.input}
-                placeholder="Group Name"
-                value={groupData.name}
-                onChangeText={(text) => setGroupData({ ...groupData, name: text })}
-              />
+
               <TextInput
                 style={styles.input}
                 placeholder="Group Description"
@@ -91,17 +90,32 @@ const GroupDetailsPage = ({ route }) => {
             </>
           ) : (
             <>
-              <Text style={styles.text}>Group Name: {groupData.name}</Text>
-              <Text style={styles.text}>Group Description: {groupData.description}</Text>
+
             </>
           )}
+
            <View style={styles.expenseHeader}>
           <Text style={styles.subTitle}>History of expenses:</Text>
+
+          <View style = {styles.icons }>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('BarGraph for group', { groupID: groupId, groupName:groupData.name })}>
                 <FontAwesome name="bar-chart" size={24} color="black" />
           </TouchableOpacity>
+          <Text>     </Text>
+          <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => navigation.navigate('Receipt Scan')}
+              >
+                <FontAwesome name="camera-retro" size={24} color="black" />
+              </TouchableOpacity>
+            </View>
+
           </View>
-               
+          
+
+         
+          
+   
        
           <FlatList
             data={expenses}
@@ -166,6 +180,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
+  },
+  icons:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginRight: 10,
+    position: 'absolute',
+    right: -10,
+    top: 20,
+    backgroundColor: 'white',
+
+    borderRadius: 5,
+   
+  
   },
   expenseContainer: {
     flexDirection: 'row',

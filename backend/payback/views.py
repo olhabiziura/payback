@@ -189,8 +189,9 @@ def get_profile_data(request, user_id):
         # Fetch user profile data
         user_profile = User.objects.get(id=user_id)
         profile = UserProfile.objects.get(user=user_profile)
-    
+
         serializer = UserProfileSerializer(profile)
+
         response_data = serializer.data
 
         # Add profile picture URL to the response
@@ -612,7 +613,8 @@ def get_user_ows_serialised(request):
 ####################################################################################################
 
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY_TEST
+import logging
 
 @csrf_exempt
 @require_POST
@@ -620,13 +622,10 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 def process_payment_and_payout(request):
     try:
         data = json.loads(request.body)
-        
+
         amount = data.get('amount')
         currency = data.get('currency', 'eur')
-        recipient_iban = data.get('iban')
-        recipient_name = data.get('name')
         card_details = data.get('cardDetails')  # card details from the frontend
-
         amount_in_cents = int(float(amount) * 100)  # Convert to integer
 
         # Validate minimum amount (€0.50 EUR)
@@ -644,21 +643,10 @@ def process_payment_and_payout(request):
                     'cvc': card_details['cvc'],
                 },
             )
-        except stripe.error.CardError as e:
-            return JsonResponse({'error': e.user_message}, status=400)
-        except stripe.error.RateLimitError as e:
-            return JsonResponse({'error': 'Rate limit error'}, status=500)
-        except stripe.error.InvalidRequestError as e:
-            return JsonResponse({'error': 'Invalid parameters'}, status=400)
-        except stripe.error.AuthenticationError as e:
-            return JsonResponse({'error': 'Authentication error'}, status=403)
-        except stripe.error.APIConnectionError as e:
-            return JsonResponse({'error': 'Network error'}, status=500)
         except stripe.error.StripeError as e:
-            return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
-        except Exception as e:
-            return JsonResponse({'error': str(e)+'szfd'}, status=500)
-
+            print(str(e))
+            return JsonResponse({'error': str(e)}, status=400)
+        
         # Step 2: Create and confirm the payment intent
         try:
             payment_intent = stripe.PaymentIntent.create(
@@ -668,41 +656,30 @@ def process_payment_and_payout(request):
                 confirm=True,
                 payment_method=payment_method.id,
             )
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': str(e)}, status=400)
         except stripe.error.CardError as e:
             return JsonResponse({'error': e.user_message}, status=400)
-        except stripe.error.RateLimitError as e:
-            return JsonResponse({'error': 'Rate limit error'}, status=500)
-        except stripe.error.InvalidRequestError as e:
-            return JsonResponse({'error': 'Invalid parameters'}, status=400)
-        except stripe.error.AuthenticationError as e:
-            return JsonResponse({'error': 'Authentication error'}, status=403)
-        except stripe.error.APIConnectionError as e:
-            return JsonResponse({'error': 'Network error'}, status=500)
+        except stripe.error.RateLimitError:
+            return JsonResponse({'error': 'Too many requests made to the API.'}, status=429)
+        except stripe.error.InvalidRequestError:
+            return JsonResponse({'error': 'Invalid parameters were supplied.'}, status=400)
+        except stripe.error.AuthenticationError:
+            return JsonResponse({'error': 'Authentication with Stripe API failed.'}, status=403)
+        except stripe.error.APIConnectionError:
+            return JsonResponse({'error': 'Network communication with Stripe failed.'}, status=500)
         except stripe.error.StripeError as e:
-            return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
-        except Exception as e:
-            return JsonResponse({'error': str(e)+'dsjg'}, status=500)
+            return JsonResponse({'error': 'An error occurred with Stripe: ' + str(e)}, status=500)
 
         if payment_intent['status'] != 'succeeded':
             return JsonResponse({'error': 'Payment failed.'}, status=400)
 
-        # Step 3: Create a payout to the recipient's bank account
-        try:
-            payout = stripe.Payout.create(
-                amount=amount_in_cents - int(amount_in_cents * 0.028 + 30),  # Subtracting Stripe fees (2.9% + 0.30 EUR)
-                currency=currency,
-                destination=recipient_iban,
-                description=f"Payout to {recipient_name}",
-            )
-        except stripe.error.StripeError as e:
-            return JsonResponse({'error': 'Payout creation failed: ' + str(e)}, status=500)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-
-        return JsonResponse({'status': 'success', 'payout_id': payout.id})
+        return JsonResponse({'status': 'success', 'payment_intent_id': payment_intent.id})
+        
     except Exception as e:
-        print(e)
+        print(str(e))
         return JsonResponse({'error': str(e)}, status=500)
+
     
 
 import json

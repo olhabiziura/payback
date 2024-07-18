@@ -46,7 +46,6 @@ const PaymentForm = ({ navigation }) => {
 
   return (
     <View style = {styles.safeArea}>
-      <HeaderBar style={styles.header_container} navigation={navigation} goBack={true} person={true} home={true} bars={true} question={true} />
 
     <StripeWrapper>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -81,7 +80,7 @@ const PaymentForm = ({ navigation }) => {
                 onCardChange={(details) => setCardDetails(details)}
                 style={styles.cardField}
               />
-              <Button title="Pay and Payout" onPress={handlePayment} color="#6200EE" />
+              <Button title="Pay and Payout" onPress={handlePayment} color="#2471A3" />
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -95,7 +94,7 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight-50 : 0,
+    paddingTop: 20,
   },
   container: {
     flex: 1,
@@ -115,13 +114,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5, // For Android shadow
+    marginTop: '-30%',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#6200EE',
+    color: '#2471A3',
   },
   input: {
     borderWidth: 1,

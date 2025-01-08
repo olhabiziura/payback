@@ -88,7 +88,7 @@ const AfterSignUpScreen = ({ navigation, route }) => {
           });
     
           if (response.status === 200) {
-            navigation.navigate('Home Page')
+            navigation.navigate('BarGraph')
           } else {
             console.error('Failed to update profile');
           }

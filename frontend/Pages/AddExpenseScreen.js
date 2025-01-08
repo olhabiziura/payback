@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Button, Platform } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, Button, Platform, TouchableWithoutFeedback, Keyboard  } from 'react-native';
 import api from '../api'; // Import your API module
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
@@ -77,8 +77,9 @@ const AddExpensePage = ({ route, navigation }) => {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <SafeAreaView style= {styles.safeArea}>
-
+      
     <View style={styles.container}>
       <Text style={styles.title}>New Expense</Text>
       <TextInput
@@ -123,6 +124,7 @@ const AddExpensePage = ({ route, navigation }) => {
       </TouchableOpacity>
     </View>
     </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

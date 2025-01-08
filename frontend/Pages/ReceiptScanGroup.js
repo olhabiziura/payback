@@ -6,11 +6,13 @@ import ReceiptScan from './ReceiptScanScreen';
 
 const ReceiptScanGroup = ({ navigation, route }) => {
     const { data } = route.params || {};
+    console.log ("112343212")
+    console.log(data)
 
 
   const handleAddToExisting = () => {
     // Navigate to the screen where the user can select an existing group
-    navigation.navigate('AddToExistingGroup');
+    navigation.navigate('ReceiptScan choose existing group',{data});
   };
 
   const handleCreateNewOne = () => {

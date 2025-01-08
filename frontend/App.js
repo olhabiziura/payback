@@ -25,9 +25,13 @@ import ExpenseDetailsPage from './Pages/ExpenseScreen';
 import SpinWheelGame from './Pages/SpeenWheel';
 import ReceiptScan from './Pages/ReceiptScanScreen';
 import ReceiptScanGroup from './Pages/ReceiptScanGroup';
+
 import ReceiptScanAddGroup from './Pages/ReceiptScanAddGroup';
+import ReceiptScanChooseGroup from './Pages/ReceiptScanChooseGroup';
+
 import ReceiptScanAddExpense from './Pages/ReceiptScanAddExpenses';
 import PaymentForm from './Pages/PayPage';
+
 
 
 const refreshAccessToken = async (setToken) => {
@@ -132,8 +136,11 @@ const App = () => {
           <Stack.Screen name="SpinWheel" component={SpinWheelGame} />
           <Stack.Screen name="Payment Page" component={PaymentForm} options={{ headerShown: false, presentation: 'modal' }}/>
           <Stack.Screen name="Receipt Scan" component={ReceiptScan} />
-          <Stack.Screen name="ReceiptScan choose group" component={ReceiptScanGroup} />
-          <Stack.Screen name="ReceiptScan add group" component={ReceiptScanAddGroup} />
+          <Stack.Screen name="ReceiptScan choose group" component={ReceiptScanGroup} options={{ headerShown: false, presentation: 'modal' }}/>
+          
+          <Stack.Screen name="ReceiptScan add group" component={ReceiptScanAddGroup} options={{ headerShown: false, presentation: 'modal' }}/>
+          <Stack.Screen name="ReceiptScan choose existing group" component={ReceiptScanChooseGroup} options={{ headerShown: false, presentation: 'modal' }}/>
+
           <Stack.Screen name="ReceiptScan add expenses" component={ReceiptScanAddExpense} />
         </>
       </Stack.Navigator>

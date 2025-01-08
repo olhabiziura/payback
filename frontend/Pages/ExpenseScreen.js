@@ -43,8 +43,8 @@ const ExpenseDetailsPage = ({ route }) => {
     navigation.navigate('Profile', { user_id: userId });
   };
 
-  const handlePayBackPress = (expenseId) => {
-    navigation.navigate('Payment Page', { expenseId });
+  const handlePayBackPress = (userDetails) => {
+    navigation.navigate('Payment Page', { userDetails: userDetails, expenseDetails: expenseDetails });
   };
 
   return (
@@ -86,7 +86,7 @@ const ExpenseDetailsPage = ({ route }) => {
                       onPress={() => {
                         if (owe.registered) {
                           if (owe.user_id === currentUser.id) {
-                            handlePayBackPress(expenseId);
+                            handlePayBackPress(owe);
                           } else {
                             handleUserPress(owe.user_id);
                           }
@@ -101,7 +101,7 @@ const ExpenseDetailsPage = ({ route }) => {
                       {owe.registered && (
                         <View style={styles.iconContainer}>
                           {owe.user_id === currentUser.id ? (
-                            <TouchableOpacity onPress={() => handlePayBackPress(expenseId)} style={styles.payBackButton}>
+                            <TouchableOpacity onPress={() => handlePayBackPress(owe)} style={styles.payBackButton}>
                               <View style={styles.payBackButton}>
                                 <Text style={styles.payBackText}>PayBack</Text>
                                 <Ionicons name="arrow-forward" size={16} color="#007bff" style={styles.icon} />

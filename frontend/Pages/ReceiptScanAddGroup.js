@@ -46,7 +46,7 @@ const ReceiptScanAddGroup = ({ navigation, route }) => {
     setPeople(people.filter((_, i) => i !== index));
   };
 
-  const handleAddGroup = async (data) => {
+  const handleAddGroup = async () => {
     if (groupName.trim() && people.length > 0) {
       try {
         const response = await api.post('/api/addgroup/', {
@@ -60,7 +60,8 @@ const ReceiptScanAddGroup = ({ navigation, route }) => {
           try {
             const groupResponse = await api.get(`/api/groups/${groupId}/`);
             const groupdata = groupResponse.data;
-
+            console.log ("Data passed in add expenses:")
+            console.log(data)
             // Pass groupdata and data as route parameters
             navigation.navigate('ReceiptScan add expenses', { groupdata, data });
           } catch (error) {

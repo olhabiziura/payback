@@ -46,6 +46,12 @@ const HeaderBar = ({ navigation, goBack, person, home, bars, question, title }) 
             onPress={() => navigation.navigate('Profile', { user_id: myId })}
           />
         )}
+        {home && (
+          <Appbar.Action
+            icon={() => <Icon1 name="home-outline" size={24} />}
+            onPress={() => navigation.navigate('BarGraph')}
+          />
+        )}
         <View style={styles.flexContainer}>
           <Appbar.Content title={title} titleStyle={styles.headerTitle} />
         </View>

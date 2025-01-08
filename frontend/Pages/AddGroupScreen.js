@@ -62,8 +62,8 @@ const AddGroupScreen = ({ navigation }) => {
 
   return (
     <View style = {styles.safeArea}>
-
     <View style={styles.container}>
+      <Text style={styles.heading}>Add New Group</Text>
       <Text style={styles.label}>Enter Group Name:</Text>
       <TextInput
         style={styles.input}
@@ -117,13 +117,40 @@ const AddGroupScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F4F4F4',
+    paddingTop: Platform.OS === 'ios' ? StatusBar.currentHeight : 0,
+  },
   container: {
     flex: 1,
     padding: 20,
+    margin: 20
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 18,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2471A3',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   label: {
     fontSize: 18,
     marginBottom: 10,
+    color: '#333',
+    fontWeight: '600',
   },
   input: {
     height: 40,
@@ -131,9 +158,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    borderRadius: 5,
+    backgroundColor: '#fff',
   },
   friendList: {
     maxHeight: 150,
+    marginBottom: 20,
   },
   friendItem: {
     flexDirection: 'row',
@@ -149,33 +179,26 @@ const styles = StyleSheet.create({
   },
   person: {
     flex: 1,
+    fontSize: 16,
   },
   removeButton: {
     marginLeft: 10,
   },
   removeButtonText: {
     color: 'red',
+    fontSize: 14,
   },
   addButton: {
-    marginBottom: '40%',
-    padding: 10,
-    backgroundColor: 'blue',
+    backgroundColor: '#2471A3',
+    padding: 15,
     alignItems: 'center',
+    borderRadius: 5,
+    marginTop: 20,
   },
   addButtonText: {
     color: 'white',
     fontSize: 18,
-  },
-  safeArea: {
-    paddingTop: 80,
-    flex: 1,
-    backgroundColor: '#F4F4F4',
-   
-  },
-  header_container:{
-    
-    alignSelf: 'center',
-    justifyContent: 'center'
+    fontWeight: '600',
   },
 });
 

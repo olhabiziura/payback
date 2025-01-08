@@ -20,6 +20,7 @@ const BarGraphGroup = ({ navigation, route }) => {
   const [barWidth, setBarWidth ] =  useState(40); // Adjust the width of each bar as needed
   const maxBarHeight = screenHeight / 3; // Max height of bars
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,6 +36,7 @@ const BarGraphGroup = ({ navigation, route }) => {
         const transformedData = fetchedData.map(item => ({
           label: item.name, // Change 'name' to 'label' for better understanding
           value: parseFloat(item.amount), // Ensure value is a number
+          id: item.user_id,
         }));
         const maxLabelLength = Math.max(...transformedData.map(item => item.label.length));
         setBarWidth(maxLabelLength * 10); // Adjust multiplier as needed for spacing
@@ -50,10 +52,12 @@ const BarGraphGroup = ({ navigation, route }) => {
   }, []);
 
 
-  const handleBarPress = (amount) => {
-    
-    navigation.navigate('Payment Page');
-
+  const handleBarPress = (amount, id, name) => {
+    console.log(amount, id, name);
+    const userDetails = { user_id: id };
+    const expenseDetails = { name: `every debt to ${name}`, amount: Math.abs(amount) };
+    console.log(expenseDetails.amount);
+    navigation.navigate('Payment Page', { userDetails: userDetails, expenseDetails: expenseDetails });
   };
 
   if (data.length === 0) {
@@ -85,7 +89,7 @@ const BarGraphGroup = ({ navigation, route }) => {
                     barHeight = 50;
                   }
                   return (
-                    <TouchableOpacity onPress={() => handleBarPress(item.value)} >
+                    <TouchableOpacity onPress={() => handleBarPress(item.value, item.id, item.label)} >
                     <View key={index} style={styles.barContainer}>
                       <View
                         style={[

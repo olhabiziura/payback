@@ -36,6 +36,13 @@ const SlidingMenu = ({ navigation, isVisible, onClose }) => {
             transform: [{ translateY: translateY.value }],
         };
     });
+    const handlePress = () => {
+        
+        const userDetails = { user_id: null };
+        const expenseDetails = { name: `what you want`, amount: null };
+        console.log(expenseDetails.amount);
+        navigation.navigate('Payment Page', { userDetails: userDetails, expenseDetails: expenseDetails });
+      };
 
     return (
         <Modal visible={isVisible} transparent animationType="slide">
@@ -51,7 +58,7 @@ const SlidingMenu = ({ navigation, isVisible, onClose }) => {
                                     <TouchableOpacity onPress={() => navigation.navigate('Receipt Scan')}>
                                         <Text style={styles.menuText}>Receipt Scanner</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => navigation.navigate('Payment Page')}>
+                                    <TouchableOpacity onPress={() => handlePress()}>
                                         <Text style={styles.menuText}>Pay Now</Text>
                                     </TouchableOpacity>
                                 </View>
@@ -68,7 +75,7 @@ const styles = StyleSheet.create({
     modalBackground: {
         flex: 1,
         justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     container: {
         width: '100%',

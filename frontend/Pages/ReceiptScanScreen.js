@@ -53,8 +53,8 @@ const ReceiptScan = ({ navigation }) => {
         // Handle the response as needed
         console.log('Response:', response.data); // Log the response to the console
         setData(response.data['items'])
-        console.log(data)
-        navigation.navigate('ReceiptScan choose group', {data})
+  
+        navigation.navigate('ReceiptScan choose group', {data: response.data})
       } catch (error) {
         console.error('Error uploading receipt:', error);
         setUploading(false);
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#2471A3',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',

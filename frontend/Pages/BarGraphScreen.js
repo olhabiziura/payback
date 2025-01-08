@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, ScrollView, Image, TouchableOpacity, Animated, Platform, StatusBar } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderBar from '../components/HeaderBar';
 import api from '../api';
-import { Platform, StatusBar } from "react-native";
 import { Button } from 'react-native-paper';
 
 const screenHeight = Dimensions.get('window').height;
@@ -13,24 +12,32 @@ const maxBarHeight = screenHeight / 3.75;
 const BarGraphScreen = ({ navigation }) => {
   const [data, setData] = useState([]);
   const [isEmptyData, setIsEmptyData] = useState(true);
-
+  const [name, setName] = useState(null);
+  const [surname, setSurname] = useState(null);
+  const [myId, setMyId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const params = {
-          filter: 'all',
-        };
-        const response = await api.get('/api/graph-data/', { params });
-        const fetchedData = response.data;
-
-        const transformedData = fetchedData.map(item => ({
+        const response = await api.get('/api/graph-data/', { params: { filter: 'all' } });
+        const fetchedData = response.data.map(item => ({
           label: item.name,
           value: parseFloat(item.amount),
+          id: item.user_id,
         }));
-        setData(transformedData);
+  
+        setData(fetchedData);
+        setIsEmptyData(fetchedData.length === 0);
 
-        setIsEmptyData(transformedData.length === 0);
+        const userResponse = await api.get('/api/users/me/');
+        const userData = userResponse.data;
+        setMyId(userData.id);
+        setName(userData.name);
+        setSurname(userData.surname);
+
+        if (!userData.name || !userData.surname) {
+          navigation.navigate('After Sign Up');
+        }
       } catch (error) {
         console.error('Error fetching data: ', error);
       }
@@ -39,27 +46,28 @@ const BarGraphScreen = ({ navigation }) => {
     fetchData();
   }, []);
 
-
-  const handleBarPress = (amount) => {
-    
-    navigation.navigate('Payment Page');
-
+  const handleBarPress = (amount, id, name) => {
+    console.log(amount, id, name);
+    const userDetails = { user_id: id };
+    const expenseDetails = { name: `every debt to ${name}`, amount: Math.abs(amount) };
+    console.log(expenseDetails.amount);
+    navigation.navigate('Payment Page', { userDetails: userDetails, expenseDetails: expenseDetails });
   };
 
   if (isEmptyData) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <HeaderBar style={styles.header_container} navigation={navigation} goBack={false} person={true} home={true} bars={true} question={true} title={'Total Balance'} />
+        <HeaderBar style={styles.headerContainer} navigation={navigation} goBack={false} person={true} home={true} bars={true} question={true} title="Total Balance" />
         <View style={styles.containerMain}>
           <Text style={styles.title}>Today you are balanced out!</Text>
           <Image source={require('../assets/images/happy_panda.png')} style={styles.image} />
-          <Button
-            mode="contained"
+          <CustomButton
+            title="Create groups & add expenses!"
             onPress={() => navigation.navigate('Groups')}
-            style={styles.button}
-          >
-            Groups
-          </Button>
+            titleColor="black"
+            backgroundColor="#e7e7e7"
+            icon="people-outline"
+          />
         </View>
       </SafeAreaView>
     );
@@ -69,24 +77,24 @@ const BarGraphScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <HeaderBar style={styles.header_container} navigation={navigation} goBack={false} person={true} home={true} bars={true} question={true} title={'Total Balance'} />
-    
+      <HeaderBar style={styles.headerContainer} navigation={navigation} goBack={false} person={true} home={false} bars={true} question={true} title="Total Balance" />
       <View style={styles.containerMain}>
-      <Text style={styles.text}>Welcome To Payback!</Text>
+        <Text style={styles.text}>Welcome To Payback!</Text>
         <View style={styles.graphFrame}>
           <ScrollView horizontal contentContainerStyle={styles.horizontalScroll}>
             <View style={styles.graphContainer}>
               <View style={styles.zeroLine} />
-              {data
-                .filter(item => item.value !== 0)
-                .map((item, index) => {
-                  let barHeight = (Math.abs(item.value) / maxValue) * maxBarHeight;
-                  if (barHeight <= 50) {
-                    barHeight = 50;
-                  }
-                  return (
-                    <TouchableOpacity onPress={() => handleBarPress(item.value)} >
-                    <View key={index} style={styles.barContainer}>
+              {data.filter(item => item.value !== 0).map((item, index) => {
+                let barHeight = (Math.abs(item.value) / maxValue) * maxBarHeight;
+                barHeight = barHeight <= 50 ? 50 : barHeight;
+
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => (item.id !== undefined && item.value < 0) ? handleBarPress(item.value, item.id, item.label) : null}
+                    disabled={item.id === undefined || item.value >= 0}
+                  >
+                    <View style={styles.barContainer}>
                       <View
                         style={[
                           styles.bar,
@@ -98,21 +106,13 @@ const BarGraphScreen = ({ navigation }) => {
                           },
                         ]}
                       >
-                      
-                      <View>
-
                         <Text style={styles.value}>{item.value}</Text>
                         <Text style={styles.label}>{item.label}</Text>
                       </View>
-                      </View>
-
-                      
                     </View>
-                    </TouchableOpacity>
-                    
-                  );
-                })}
-                
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </ScrollView>
         </View>
@@ -139,10 +139,7 @@ const CustomButton = ({ title, onPress, titleColor, backgroundColor, icon }) => 
   };
 
   return (
-    <TouchableOpacity onPress={() => {
-      animateButton();
-      onPress();
-    }} activeOpacity={0.8}>
+    <TouchableOpacity onPress={() => { animateButton(); onPress(); }} activeOpacity={0.8}>
       <Animated.View style={[styles.button, { backgroundColor, transform: [{ scale: scaleValue }] }]}>
         <View style={styles.buttonContent}>
           <Icon name={icon} size={24} color={titleColor} style={styles.icon} />
@@ -157,13 +154,10 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#F4F4F4',
-    paddingTop: Platform.OS == "IOS" ? StatusBar.currentHeight : -50,
+    paddingTop: Platform.OS === 'IOS' ? StatusBar.currentHeight : -50,
   },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 100,
+  headerContainer: {
+    paddingBottom: 10,
   },
   containerMain: {
     width: '100%',
@@ -205,8 +199,6 @@ const styles = StyleSheet.create({
     width: 70,
     justifyContent: 'flex-end',
     borderRadius: 10,
-    
-    
   },
   label: {
     textAlign: 'center',
@@ -217,11 +209,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'white',
     padding: 0,
-  
   },
   zeroLine: {
     position: 'absolute',
-    top: maxBarHeight ,
+    top: maxBarHeight,
     left: 0,
     right: 0,
     height: 1,
@@ -230,9 +221,10 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
+    borderRadius: 60,
   },
   button: {
-    width: 280,
+    width: 300,
     paddingVertical: 15,
     borderRadius: 30,
     shadowColor: '#000',
@@ -242,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginVertical: 15,
     backgroundColor: '#e7e7e7',
-    alignSelf: "center",
+    alignSelf: 'center',
   },
   buttonContent: {
     flexDirection: 'row',
@@ -269,5 +261,4 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
 export default BarGraphScreen;
